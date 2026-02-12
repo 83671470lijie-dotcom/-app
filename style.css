@@ -1,0 +1,729 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #f9f9ff;
+    color: #333;
+    overflow: hidden;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(255, 221, 173, 0.3) 0%, transparent 20%),
+        radial-gradient(circle at 80% 80%, rgba(173, 216, 230, 0.3) 0%, transparent 20%),
+        radial-gradient(circle at 40% 60%, rgba(221, 160, 221, 0.3) 0%, transparent 20%);
+    background-size: 100% 100%;
+    background-attachment: fixed;
+}
+
+/* 更美观的背景动画效果 */
+@keyframes backgroundMove {
+    0% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image: 
+        linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.5) 100%),
+        radial-gradient(circle at 10% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 20%);
+    background-size: 100% 100%, 100% 100%, 100% 100%;
+    background-attachment: fixed;
+    background-position: 0% 0%;
+    animation: backgroundMove 30s ease infinite;
+    border-radius: 20px;
+    margin: 0;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 响应式调整游戏容器 */
+@media (max-width: 768px) {
+    #game-container {
+        margin: 10px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    #game-container {
+        margin: 5px;
+        padding: 10px;
+        border-radius: 15px;
+    }
+}
+
+h1 {
+    font-size: 3rem;
+    color: #ff6b6b;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    text-align: center;
+    animation: titleBounce 2s infinite alternate;
+}
+
+@keyframes titleBounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+#game-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px 20px;
+    border-radius: 30px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 2px solid #f0f0f0;
+}
+
+#game-info div {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: #f8f9fa;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    flex: 1 1 120px;
+    text-align: center;
+}
+
+#game-info div:hover {
+    transform: scale(1.05);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* 响应式调整游戏信息区域 */
+@media (max-width: 480px) {
+    #game-info {
+        font-size: 1rem;
+        padding: 10px 15px;
+        gap: 8px;
+    }
+    
+    #game-info div {
+        flex: 1 1 80px;
+        padding: 6px 12px;
+    }
+}
+
+#tooth-model {
+    width: 400px;
+    height: 280px;
+    background-color: #ffffff;
+    border: 6px solid #f0f0f0;
+    border-radius: 70px;
+    position: relative;
+    margin-bottom: 60px;
+    box-shadow: 
+        0 8px 16px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(0,0,0,0.05);
+    overflow: hidden;
+    background-image: 
+        linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(245,245,245,1) 50%, rgba(255,255,255,1) 100%),
+        linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.5) 100%);
+    transition: all 0.3s ease;
+}
+
+#tooth-model:hover {
+    transform: scale(1.02);
+    box-shadow: 
+        0 12px 24px rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 牙龈元素 */
+#tooth-model::before {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background-color: #ff9ff3;
+    border-radius: 0 0 50% 50%;
+    box-shadow: inset 0 -2px 4px rgba(255, 107, 107, 0.3);
+    background-image: linear-gradient(to top, #ff6b6b, #ff9ff3);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* 牙齿纹理 */
+#tooth-model::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.9) 0%, transparent 20%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.9) 0%, transparent 20%),
+        radial-gradient(circle at 40% 40%, rgba(255,255,255,0.7) 0%, transparent 15%),
+        radial-gradient(circle at 60% 60%, rgba(255,255,255,0.7) 0%, transparent 15%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* 牙齿光泽效果 */
+#tooth-model .shine-effect {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 60%;
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: shine 3s infinite alternate;
+    z-index: 3;
+}
+
+@keyframes shine {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.8; }
+}
+
+.food-residue {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    animation: bounce 1s infinite alternate;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%);
+}
+
+/* 不同形状的食物残渣 */
+.food-residue:nth-child(odd) {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.food-residue:nth-child(3n) {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+.food-residue:nth-child(4n) {
+    border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-8px) scale(1.1); }
+}
+
+.cavity-bug {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    background-color: #8b5a2b;
+    border-radius: 50%;
+    animation: wiggle 1.5s infinite alternate;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%);
+}
+
+/* 蛀牙虫的眼睛 */
+.cavity-bug::before,
+.cavity-bug::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    top: 8px;
+    box-shadow: inset 0 2px 2px rgba(0,0,0,0.3);
+}
+
+.cavity-bug::before {
+    left: 6px;
+}
+
+.cavity-bug::after {
+    right: 6px;
+}
+
+/* 蛀牙虫的嘴巴 */
+.cavity-bug span {
+    position: absolute;
+    width: 12px;
+    height: 2px;
+    background-color: black;
+    border-radius: 2px;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 蛀牙虫的眼睛瞳孔 */
+.cavity-bug::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    top: 8px;
+    left: 6px;
+    box-shadow: inset 0 2px 2px rgba(0,0,0,0.3);
+}
+
+.cavity-bug::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    top: 8px;
+    right: 6px;
+    box-shadow: inset 0 2px 2px rgba(0,0,0,0.3);
+}
+
+/* 快速蛀牙虫样式 */
+.cavity-bug[style*="background-color: #ff6b6b"] {
+    background-color: #ff6b6b;
+    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%);
+    animation: wiggle 1s infinite alternate;
+}
+
+/* 坚韧蛀牙虫样式 */
+.cavity-bug[style*="background-color: #8b4513"] {
+    background-color: #8b4513;
+    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%);
+    animation: wiggle 2s infinite alternate;
+}
+
+@keyframes wiggle {
+    0% { transform: rotate(-5deg) scale(1); }
+    50% { transform: rotate(0deg) scale(1.05); }
+    100% { transform: rotate(5deg) scale(1); }
+}
+
+#game-controls {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    padding: 20px 35px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 6px 12px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 10px 20px rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 
+        0 4px 8px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+}
+
+#toothpaste-gun {
+    background-color: #4ecdc4;
+    color: white;
+    background-image: linear-gradient(135deg, #4ecdc4 0%, #45b7d1 100%);
+    border: 3px solid #3aafa9;
+}
+
+#toothpaste-gun:hover {
+    background-image: linear-gradient(135deg, #3aafa9 0%, #2b9eb3 100%);
+}
+
+#toothbrush-sword {
+    background-color: #ff6b6b;
+    color: white;
+    background-image: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    border: 3px solid #e74c3c;
+}
+
+#toothbrush-sword:hover {
+    background-image: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+#start-button {
+    background-color: #45b7d1;
+    color: white;
+    font-size: 1.4rem;
+    padding: 20px 50px;
+    background-image: linear-gradient(135deg, #45b7d1 0%, #2c8cb0 100%);
+    border: 3px solid #3498db;
+    margin-top: 20px;
+}
+
+#start-button:hover {
+    background-image: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    transform: translateY(-4px) scale(1.08);
+}
+
+/* 按钮发光效果 */
+button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+    transform: scale(0);
+    transition: transform 0.6s ease;
+}
+
+button:hover::after {
+    transform: scale(1);
+}
+
+/* 按钮图标效果 */
+#toothpaste-gun::before {
+    content: '🧴';
+    margin-right: 10px;
+    font-size: 1.4rem;
+}
+
+#toothbrush-sword::before {
+    content: '🗡️';
+    margin-right: 10px;
+    font-size: 1.4rem;
+}
+
+#start-button::before {
+    content: '🎮';
+    margin-right: 10px;
+    font-size: 1.6rem;
+}
+
+#super-cleaner {
+    background-color: #9b59b6;
+    color: white;
+    background-image: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    border: 3px solid #7d3c98;
+}
+
+#super-cleaner:hover {
+    background-image: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+}
+
+#super-cleaner::before {
+    content: '🧹';
+    margin-right: 10px;
+    font-size: 1.4rem;
+}
+
+#pause-button {
+    background-color: #ffd93d;
+    color: #333;
+    background-image: linear-gradient(135deg, #ffd93d 0%, #ffcc00 100%);
+    border: 3px solid #ffcc00;
+}
+
+#pause-button:hover {
+    background-image: linear-gradient(135deg, #ffcc00 0%, #e6b800 100%);
+}
+
+#pause-button::before {
+    content: '⏸️';
+    margin-right: 10px;
+    font-size: 1.4rem;
+}
+
+#game-message {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin-bottom: 30px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px 40px;
+    border-radius: 35px;
+    box-shadow: 
+        0 6px 12px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(0,0,0,0.05);
+    border: 3px solid #f0f0f0;
+    min-width: 300px;
+    max-width: 500px;
+    transition: all 0.3s ease;
+    animation: messagePulse 3s infinite alternate;
+}
+
+#game-message:hover {
+    transform: scale(1.02);
+    box-shadow: 
+        0 8px 16px rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+@keyframes messagePulse {
+    0% { 
+        transform: scale(1); 
+        box-shadow: 
+            0 6px 12px rgba(0,0,0,0.1),
+            inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+    100% { 
+        transform: scale(1.03); 
+        box-shadow: 
+            0 8px 16px rgba(0,0,0,0.15),
+            inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    #tooth-model {
+        width: 300px;
+        height: 200px;
+    }
+    
+    button {
+        padding: 14px 22px;
+        font-size: 0.95rem;
+    }
+    
+    #game-controls {
+        gap: 20px;
+    }
+    
+    #game-message {
+        font-size: 1.2rem;
+        padding: 15px 30px;
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.6rem;
+        margin-bottom: 15px;
+    }
+    
+    #game-info {
+        font-size: 0.9rem;
+        max-width: 300px;
+        padding: 10px 15px;
+    }
+    
+    #tooth-model {
+        width: 280px;
+        height: 180px;
+        margin-bottom: 20px;
+    }
+    
+    .food-residue {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .cavity-bug {
+        width: 30px;
+        height: 30px;
+    }
+    
+    #game-controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    button {
+        padding: 12px 25px;
+        font-size: 0.9rem;
+        width: 200px;
+        max-width: 100%;
+    }
+    
+    #game-message {
+        font-size: 1rem;
+        text-align: center;
+        padding: 10px 20px;
+        max-width: 300px;
+        min-width: 200px;
+    }
+    
+    /* 排行榜和分数说明按钮 */
+    #leaderboard-icon,
+    #score-guide-icon {
+        padding: 6px;
+    }
+    
+    #leaderboard-icon span,
+    #score-guide-icon span {
+        font-size: 16px;
+    }
+    
+    #leaderboard {
+        width: 130px;
+        top: 50px;
+        right: 5px;
+    }
+    
+    #score-guide {
+        width: 160px;
+        bottom: 50px;
+        left: 5px;
+    }
+}
+
+@media (max-width: 360px) {
+    h1 {
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+    }
+    
+    #game-container {
+        padding: 10px;
+        border-radius: 15px;
+    }
+    
+    #game-info {
+        font-size: 0.8rem;
+        max-width: 250px;
+        padding: 8px 12px;
+        gap: 6px;
+    }
+    
+    #game-info div {
+        flex: 1 1 70px;
+        padding: 5px 10px;
+    }
+    
+    #tooth-model {
+        width: 250px;
+        height: 160px;
+        margin-bottom: 15px;
+        border-radius: 50px;
+    }
+    
+    .food-residue {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .cavity-bug {
+        width: 28px;
+        height: 28px;
+    }
+    
+    button {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        width: 180px;
+    }
+    
+    #game-message {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        max-width: 250px;
+    }
+    
+    /* 排行榜和分数说明按钮 */
+    #leaderboard-icon,
+    #score-guide-icon {
+        padding: 5px;
+    }
+    
+    #leaderboard-icon span,
+    #score-guide-icon span {
+        font-size: 14px;
+    }
+    
+    #leaderboard {
+        width: 120px;
+        top: 45px;
+        right: 5px;
+    }
+    
+    #leaderboard h3,
+    #score-guide h3 {
+        font-size: 12px;
+    }
+    
+    #leaderboard-list,
+    #score-guide ul {
+        font-size: 10px;
+    }
+    
+    #score-guide {
+        width: 140px;
+        bottom: 45px;
+        left: 5px;
+    }
+}
+
+/* 特效 */
+.explosion {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-color: #ffd93d;
+    border-radius: 50%;
+    animation: explosion 0.5s ease-out forwards;
+}
+
+@keyframes explosion {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.foam {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    animation: float 2s ease-out forwards;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
