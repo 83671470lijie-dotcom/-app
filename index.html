@@ -2,71 +2,330 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蛀牙虫大作战</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI健康管家</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- 音效元素 -->
     <audio id="pop-sound" preload="auto">
         <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAD/" type="audio/wav">
-    </audio>
+     </audio>
     <audio id="win-sound" preload="auto">
         <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAD/" type="audio/wav">
-    </audio>
+     </audio>
     <audio id="button-sound" preload="auto">
         <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAD/" type="audio/wav">
-    </audio>
+     </audio>
     
-    <div id="game-container">
-        <h1>蛀牙虫大作战</h1>
-        <div id="game-info">
-            <div id="level">关卡: 1</div>
-            <div id="score">分数: 0</div>
+    <!-- 首页 -->
+    <div id="home-page" class="page active">
+        <div class="header">
+            <div class="time">9:41</div>
+            <div class="header-title">首页</div>
+            <button class="ai-assistant">
+                <span class="ai-icon">🤖</span>
+                <span class="ai-text">AI健康管家</span>
+            </button>
         </div>
         
-        <!-- 排行榜按钮 -->
-        <div id="leaderboard-icon" style="position: absolute; top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.9); padding: 8px; border-radius: 50%; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); z-index: 100; cursor: pointer; text-align: center;">
-            <span style="font-size: 18px; font-weight: bold;">🏆</span>
+        <div class="content">
+            <!-- 每日打卡 -->
+            <div class="daily-checkin">
+                <h2>每日打卡</h2>
+                <div class="avatar-list">
+                    <div class="avatar">😀</div>
+                    <div class="avatar">👧</div>
+                    <div class="avatar">👩</div>
+                </div>
+                <div class="checkin-streak">
+                    <div class="streak-text">您已坚持打卡</div>
+                    <div class="streak-days">20</div>
+                    <div class="streak-unit">天</div>
+                </div>
+                <div class="checkin-calendar">
+                    <div class="calendar-day active">9</div>
+                    <div class="calendar-day active">10</div>
+                    <div class="calendar-day active">11</div>
+                    <div class="calendar-day active">12</div>
+                    <div class="calendar-day active">13</div>
+                    <div class="calendar-day active">14</div>
+                    <div class="calendar-day">15</div>
+                </div>
+            </div>
+            
+            <!-- 我的树苗 -->
+            <div class="my-tree">
+                <h2>我的树苗</h2>
+                <div class="tree-container">
+                    <div class="tree">🌳</div>
+                    <div class="tree-tools">
+                        <div class="tool">💧</div>
+                        <div class="tool">🌱</div>
+                        <div class="tool">✋</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 热点话题 -->
+            <div class="hot-topics">
+                <h2>热点话题</h2>
+                <div class="topic-card">
+                    <div class="topic-title">"年暖还寒 春季高发疾病预防指南"</div>
+                    <div class="topic-elements">
+                        <div class="topic-element">🥕</div>
+                        <div class="topic-element">🏋️</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 科普指南 -->
+            <div class="science-guide">
+                <h2>科普指南</h2>
+                <div class="guide-card">
+                    <div class="guide-icon">❤️</div>
+                    <div class="guide-title">健康科普</div>
+                </div>
+            </div>
+            
+            <!-- 我的收藏 -->
+            <div class="my-collection">
+                <h2>我的收藏</h2>
+                <div class="collection-items">
+                    <div class="collection-item">📚</div>
+                    <div class="collection-item">🎮</div>
+                    <div class="collection-item">🎵</div>
+                </div>
+            </div>
+            
+            <!-- 底部文章 -->
+            <div class="bottom-article">
+                <div class="article-icon">
+                    <div class="house-icon">🏠</div>
+                </div>
+                <div class="article-content">
+                    <div class="article-title">"七步洗手法"：让细菌远离孩子</div>
+                    <div class="article-source">xx市卫健委</div>
+                </div>
+            </div>
         </div>
-        
-        <!-- 排行榜区域 -->
-        <div id="leaderboard" style="position: absolute; top: 60px; right: 10px; background-color: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); z-index: 100; width: 150px; display: none;">
-            <h3 style="margin-top: 0; font-size: 14px; color: #333;">排行榜</h3>
-            <div id="leaderboard-list" style="margin: 5px 0; max-height: 200px; overflow-y: auto;"></div>
-        </div>
-        
-        <!-- 分数说明按钮 -->
-        <div id="score-guide-icon" style="position: absolute; bottom: 10px; left: 10px; background-color: rgba(255, 255, 255, 0.9); padding: 8px; border-radius: 50%; box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); z-index: 100; cursor: pointer; text-align: center;">
-            <span style="font-size: 18px; font-weight: bold;">📋</span>
-        </div>
-        
-        <!-- 分数说明区域 -->
-        <div id="score-guide" style="position: absolute; bottom: 60px; left: 10px; background-color: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); z-index: 100; width: 180px; display: none;">
-            <h3 style="margin-top: 0; font-size: 14px; color: #333;">分数说明</h3>
-            <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px; color: #666;">
-                <li>清除食物残渣: +10分</li>
-                <li>击败普通蛀牙虫: +50分</li>
-                <li>击败快速蛀牙虫: +70分</li>
-                <li>击败坚韧蛀牙虫: +100分</li>
-                <li>点击空白区域: -10分</li>
-                <li>牙膏泡沫枪: -20分</li>
-                <li>牙刷剑: -30分</li>
-                <li>超级清洁剂: -50分</li>
-            </ul>
-        </div>
-        <div id="tooth-model">
-            <div class="shine-effect"></div>
-        </div>
-        <div id="game-controls">
-            <button id="toothpaste-gun">牙膏泡沫枪</button>
-            <button id="toothbrush-sword">牙刷剑</button>
-            <button id="super-cleaner">超级清洁剂</button>
-            <button id="pause-button">暂停</button>
-        </div>
-        <div id="game-message"></div>
-        <button id="start-button">开始游戏</button>
     </div>
+    
+    <!-- 我的页面 -->
+    <div id="my-page" class="page">
+        <div class="header">
+            <div class="time">9:41</div>
+            <div class="header-title">我的</div>
+            <button class="ai-assistant">
+                <span class="ai-icon">🤖</span>
+                <span class="ai-text">AI健康管家</span>
+            </button>
+        </div>
+        
+        <div class="content">
+            <!-- 用户信息 -->
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">小橙</div>
+                    <div class="user-stats">
+                        <div class="stat">年龄：10</div>
+                        <div class="stat">身高：145cm</div>
+                        <div class="stat">体重：35kg</div>
+                    </div>
+                    <div class="recent-activity">
+                        <h3>最近运动数据</h3>
+                        <div class="activity-item">跑步：2km</div>
+                        <div class="activity-item">跳绳：240</div>
+                        <div class="activity-item">体操：60分钟</div>
+                    </div>
+                    <div class="rating">评分：A</div>
+                </div>
+                <div class="user-avatar">
+                    <div class="avatar-image">🧒</div>
+                </div>
+            </div>
+            
+            <!-- 积分兑换 -->
+            <div class="points-exchange">
+                <h2>积分兑换</h2>
+                <div class="current-points">当前积分：100</div>
+                <div class="exchange-categories">
+                    <div class="category health">
+                        <h3>健康类</h3>
+                        <div class="category-item">⌚</div>
+                    </div>
+                    <div class="category education">
+                        <h3>益智类</h3>
+                        <div class="category-item">🏀</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 信息与设置 -->
+            <div class="info-settings">
+                <h2>信息与设置</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <div class="setting-icon">📋</div>
+                        <div class="setting-text">家长管控</div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-icon">🕰️</div>
+                        <div class="setting-text">记录查询</div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-icon">⚙️</div>
+                        <div class="setting-text">设置与反馈</div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-icon">✅</div>
+                        <div class="setting-text">任务清单</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 校园页面 -->
+    <div id="campus-page" class="page">
+        <div class="header blue-header">
+            <div class="time">9:41</div>
+            <div class="header-title">家校</div>
+            <button class="ai-assistant blue-ai">
+                <span class="ai-icon">🤖</span>
+                <span class="ai-text">AI健康管家</span>
+            </button>
+        </div>
+        
+        <div class="content blue-content">
+            <!-- 标签切换 -->
+            <div class="campus-tabs">
+                <button class="tab active">校园作业</button>
+                <button class="tab">活动赛事</button>
+            </div>
+            
+            <!-- 学校信息 -->
+            <div class="school-info">
+                <div class="school-avatar">🧒</div>
+                <div class="school-details">
+                    <div class="school-name">xx市xx小学</div>
+                    <div class="school-class">三年级 1班 | 小橙</div>
+                </div>
+            </div>
+            
+            <!-- 体育积分 -->
+            <div class="sports-points">
+                <div class="points-card">
+                    <div class="points-label">体育积分</div>
+                    <div class="points-value">100</div>
+                    <div class="points-icon">⭐</div>
+                </div>
+                <div class="ranking-card">
+                    <div class="ranking-label">排行榜</div>
+                    <div class="ranking-icon">📊</div>
+                </div>
+                <div class="more-card">
+                    <div class="more-label">更多</div>
+                    <div class="more-icon">...</div>
+                </div>
+            </div>
+            
+            <!-- 任务清单 -->
+            <div class="task-list">
+                <h2>任务清单</h2>
+                <div class="task-item">
+                    <div class="task-name">跳绳</div>
+                    <div class="task-target">150次</div>
+                    <div class="task-checkbox checked"></div>
+                </div>
+                <div class="task-item">
+                    <div class="task-name">跑步</div>
+                    <div class="task-target">200m</div>
+                    <div class="task-checkbox checked"></div>
+                </div>
+                <div class="task-item">
+                    <div class="task-name">仰卧起坐</div>
+                    <div class="task-target">25次</div>
+                    <div class="task-checkbox"></div>
+                </div>
+                <div class="task-clipboard">
+                    <div class="clipboard-icon">📋</div>
+                </div>
+            </div>
+            
+            <!-- 班级动态 -->
+            <div class="class-updates">
+                <h2>班级动态</h2>
+                <div class="update-list">
+                    <div class="update-item">
+                        <div class="update-date">2026年2月1日</div>
+                        <div class="update-content">班主任发布了一次签到</div>
+                        <button class="update-button">签到</button>
+                    </div>
+                    <div class="update-item">
+                        <div class="update-date">2026年1月30日</div>
+                        <div class="update-content">班主任发布了假期任务</div>
+                        <button class="update-button confirmed">已确认</button>
+                    </div>
+                    <div class="update-item">
+                        <div class="update-date">2025年9月</div>
+                        <div class="update-content">班主任发布了新学期安排</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <button class="nav-item active" data-page="home-page">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-text">首页</span>
+        </button>
+        <button class="nav-item" data-page="game-page">
+            <span class="nav-icon">🎮</span>
+            <span class="nav-text">游戏</span>
+        </button>
+        <button class="nav-item" data-page="campus-page">
+            <span class="nav-icon">📚</span>
+            <span class="nav-text">校园</span>
+        </button>
+        <button class="nav-item" data-page="my-page">
+            <span class="nav-icon">😀</span>
+            <span class="nav-text">我的</span>
+        </button>
+    </div>
+    
+    <!-- 游戏页面 -->
+    <div id="game-page" class="page">
+        <div class="header">
+            <div class="time">9:41</div>
+            <div class="header-title">游戏</div>
+            <button class="ai-assistant">
+                <span class="ai-icon">🤖</span>
+                <span class="ai-text">AI健康管家</span>
+            </button>
+        </div>
+        
+        <div class="content">
+            <div id="game-container">
+                <h1>蛀牙虫大作战</h1>
+                <div id="game-info">
+                    <div id="level">关卡: 1</div>
+                    <div id="score">分数: 0</div>
+                </div>
+                <div id="tooth-model"></div>
+                <div id="game-controls">
+                    <button id="toothpaste-gun">牙膏泡沫枪</button>
+                    <button id="toothbrush-sword">牙刷剑</button>
+                    <button id="super-cleaner">超级清洁剂</button>
+                </div>
+                <div id="game-message"></div>
+                <button id="start-button">开始游戏</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="game.js"></script>
 </body>
 </html>

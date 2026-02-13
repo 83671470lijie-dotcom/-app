@@ -3,199 +3,20 @@ class CavityBugGame {
         this.level = 1;
         this.score = 0;
         this.gameActive = false;
-        this.isPaused = false;
         this.foodResidues = [];
         this.cavityBugs = [];
-        this.powerUps = [];
-        this.timeLeft = 60; // 时间限制，单位秒
-        this.lives = 3; // 生命值
-        this.gameTimer = null;
         this.toothModel = document.getElementById('tooth-model');
         this.startButton = document.getElementById('start-button');
         this.toothpasteGun = document.getElementById('toothpaste-gun');
         this.toothbrushSword = document.getElementById('toothbrush-sword');
-        this.pauseButton = document.getElementById('pause-button');
         this.gameMessage = document.getElementById('game-message');
         this.levelDisplay = document.getElementById('level');
         this.scoreDisplay = document.getElementById('score');
         this.popSound = document.getElementById('pop-sound');
         this.winSound = document.getElementById('win-sound');
         this.buttonSound = document.getElementById('button-sound');
-        this.lastLifeLossTime = 0;
-        this.warningGiven = false;
-        this.blankClickHandler = null;
-        this.touchStartHandler = null;
-        
-        // 武器使用状态
-        this.isUsingToothpasteGun = false;
-        this.isUsingToothbrushSword = false;
-        
-        // 连击系统
-        this.combo = 0;
-        this.maxCombo = 0;
-        this.comboTimer = null;
-        this.comboTimeLimit = 1000; // 连击时间限制（毫秒）
-        
-        // 道具系统
-        this.powerUpTypes = ['freeze', 'doubleScore', 'blast'];
-        
-        // 创建时间和生命值显示元素
-        this.createGameInfoElements();
         
         this.init();
-        
-        // 添加排行榜和分数说明的点击显示功能
-        this.initToggleControls();
-    }
-    
-    createGameInfoElements() {
-        // 检查是否已存在这些元素
-        if (!document.getElementById('time-left')) {
-            const gameInfo = document.getElementById('game-info');
-            
-            // 创建时间显示
-            const timeElement = document.createElement('div');
-            timeElement.id = 'time-left';
-            timeElement.textContent = '时间: 60s';
-            gameInfo.appendChild(timeElement);
-            
-            // 创建生命值显示
-            const livesElement = document.createElement('div');
-            livesElement.id = 'lives';
-            livesElement.textContent = '生命: 3';
-            gameInfo.appendChild(livesElement);
-            
-            // 创建分数要求显示
-            const scoreRequirementElement = document.createElement('div');
-            scoreRequirementElement.id = 'score-requirement';
-            scoreRequirementElement.textContent = '分数要求: 100';
-            gameInfo.appendChild(scoreRequirementElement);
-            
-            // 创建连击显示
-            const comboElement = document.createElement('div');
-            comboElement.id = 'combo';
-            comboElement.textContent = '连击: 0';
-            gameInfo.appendChild(comboElement);
-        }
-        
-        // 保存引用
-        this.timeDisplay = document.getElementById('time-left');
-        this.livesDisplay = document.getElementById('lives');
-        this.scoreRequirementDisplay = document.getElementById('score-requirement');
-        this.comboDisplay = document.getElementById('combo');
-    }
-    
-    // 增加连击数
-    increaseCombo() {
-        if (!this.gameActive || this.isPaused) return;
-        
-        this.combo++;
-        this.maxCombo = Math.max(this.maxCombo, this.combo);
-        
-        // 更新连击显示
-        if (this.comboDisplay) {
-            this.comboDisplay.textContent = `连击: ${this.combo}`;
-        }
-        
-        // 显示连击效果
-        if (this.combo >= 5) {
-            const comboEffect = document.createElement('div');
-            comboEffect.style.position = 'absolute';
-            comboEffect.style.left = `${this.toothModel.offsetWidth / 2 - 30}px`;
-            comboEffect.style.top = `${this.toothModel.offsetHeight / 2 - 20}px`;
-            comboEffect.style.fontSize = '24px';
-            comboEffect.style.fontWeight = 'bold';
-            comboEffect.style.color = '#ffd700';
-            comboEffect.style.animation = 'comboEffect 1s ease-out forwards';
-            comboEffect.textContent = `${this.combo}连击！`;
-            this.toothModel.appendChild(comboEffect);
-            
-            // 添加连击动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes comboEffect {
-                    0% { transform: scale(0); opacity: 1; }
-                    50% { transform: scale(1.5); opacity: 0.8; }
-                    100% { transform: scale(1); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // 自动移除效果
-            setTimeout(() => {
-                comboEffect.remove();
-                style.remove();
-            }, 1000);
-        }
-        
-        // 重置连击计时器
-        this.resetComboTimer();
-    }
-    
-    // 重置连击计时器
-    resetComboTimer() {
-        if (this.comboTimer) {
-            clearTimeout(this.comboTimer);
-        }
-        
-        this.comboTimer = setTimeout(() => {
-            this.resetCombo();
-        }, this.comboTimeLimit);
-    }
-    
-    // 重置连击数
-    resetCombo() {
-        if (this.combo > 0) {
-            // 给予连击奖励分数
-            if (this.combo >= 3) {
-                const bonusScore = this.combo * 10;
-                this.score += bonusScore;
-                this.showScoreChange(bonusScore, 'bonus');
-                this.gameMessage.textContent = `连击结束！获得${bonusScore}分奖励！`;
-            }
-            
-            this.combo = 0;
-            if (this.comboDisplay) {
-                this.comboDisplay.textContent = `连击: ${this.combo}`;
-            }
-        }
-    }
-    
-    // 显示分数变化
-    showScoreChange(amount, type = 'normal') {
-        const scoreChange = document.createElement('div');
-        scoreChange.style.position = 'absolute';
-        scoreChange.style.left = `${Math.random() * (this.toothModel.offsetWidth - 50) + 25}px`;
-        scoreChange.style.top = `${Math.random() * (this.toothModel.offsetHeight - 50) + 25}px`;
-        scoreChange.style.fontSize = '20px';
-        scoreChange.style.fontWeight = 'bold';
-        scoreChange.style.animation = 'scoreChange 1s ease-out forwards';
-        
-        if (type === 'bonus') {
-            scoreChange.style.color = '#ffd700';
-            scoreChange.textContent = `+${amount} (连击奖励)`;
-        } else {
-            scoreChange.style.color = amount > 0 ? 'green' : 'red';
-            scoreChange.textContent = amount > 0 ? `+${amount}` : `${amount}`;
-        }
-        
-        this.toothModel.appendChild(scoreChange);
-        
-        // 添加分数变化动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes scoreChange {
-                0% { transform: translateY(0); opacity: 1; }
-                100% { transform: translateY(-30px); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // 自动移除
-        setTimeout(() => {
-            scoreChange.remove();
-            style.remove();
-        }, 1000);
     }
     
     playSound(sound) {
@@ -235,29 +56,12 @@ class CavityBugGame {
                 this.useSuperCleaner();
             });
         }
-        
-        // 添加暂停按钮事件监听器
-        this.pauseButton.addEventListener('click', () => this.togglePause());
-        this.pauseButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.togglePause();
-        });
-        
-        // 添加排行榜关闭按钮事件监听器
-        const closeLeaderboardButton = document.getElementById('close-leaderboard');
-        if (closeLeaderboardButton) {
-            closeLeaderboardButton.addEventListener('click', () => {
-                document.getElementById('leaderboard').style.display = 'none';
-            });
-        }
     }
     
     startGame() {
         this.playSound(this.buttonSound);
         this.level = 1;
         this.score = 0;
-        this.timeLeft = 60;
-        this.lives = 3;
         this.gameActive = true;
         this.startButton.textContent = '重新开始';
         
@@ -276,152 +80,14 @@ class CavityBugGame {
                 this.clearGameArea();
                 this.generateFoodResidues();
                 this.updateDisplay();
-                this.updateLeaderboardDisplay();
-                this.startGameTimer();
             }
         }, 1000);
-    }
-    
-    startGameTimer() {
-        // 清除之前的计时器
-        if (this.gameTimer) {
-            clearInterval(this.gameTimer);
-        }
-        
-        // 启动新计时器
-        this.gameTimer = setInterval(() => {
-            if (this.gameActive) {
-                this.timeLeft--;
-                this.updateDisplay();
-                
-                // 检查时间是否耗尽
-                if (this.timeLeft <= 0) {
-                    this.gameOver('时间到！游戏结束！');
-                }
-            }
-        }, 1000);
-    }
-    
-    gameOver(message) {
-        this.gameActive = false;
-        this.isPaused = false;
-        
-        // 清除计时器
-        if (this.gameTimer) {
-            clearInterval(this.gameTimer);
-            this.gameTimer = null;
-        }
-        
-        // 更新排行榜
-        this.updateLeaderboard();
-        
-        // 显示游戏结束信息
-        this.gameMessage.textContent = message;
-        this.startButton.textContent = '重新开始';
-        this.pauseButton.textContent = '暂停';
-        
-        // 清除游戏区域
-        this.clearGameArea();
-        
-        // 更新排行榜显示
-        this.updateLeaderboardDisplay();
-    }
-    
-    updateLeaderboard() {
-        // 获取当前排行榜
-        let leaderboard = this.getLeaderboard();
-        
-        // 添加当前分数
-        leaderboard.push({
-            score: this.score,
-            date: new Date().toLocaleString()
-        });
-        
-        // 按分数排序
-        leaderboard.sort((a, b) => b.score - a.score);
-        
-        // 只保留前10名
-        leaderboard = leaderboard.slice(0, 10);
-        
-        // 保存排行榜
-        localStorage.setItem('cavityBugLeaderboard', JSON.stringify(leaderboard));
-    }
-    
-    getLeaderboard() {
-        // 从本地存储获取排行榜
-        const leaderboardData = localStorage.getItem('cavityBugLeaderboard');
-        return leaderboardData ? JSON.parse(leaderboardData) : [];
-    }
-    
-    showLeaderboard() {
-        // 获取排行榜数据
-        const leaderboard = this.getLeaderboard();
-        const leaderboardList = document.getElementById('leaderboard-list');
-        
-        // 清空排行榜列表
-        leaderboardList.innerHTML = '';
-        
-        // 添加排行榜项
-        if (leaderboard.length === 0) {
-            leaderboardList.innerHTML = '<p style="font-size: 12px; margin: 5px 0;">暂无记录</p>';
-        } else {
-            leaderboard.forEach((entry, index) => {
-                const listItem = document.createElement('div');
-                listItem.style.padding = '3px 0';
-                listItem.style.borderBottom = '1px solid #eee';
-                listItem.textContent = `${index + 1}. ${entry.score}分`;
-                listItem.style.fontSize = '11px';
-                leaderboardList.appendChild(listItem);
-            });
-        }
-    }
-    
-    updateLeaderboardDisplay() {
-        // 实时更新排行榜显示
-        this.showLeaderboard();
-    }
-    
-    togglePause() {
-        if (!this.gameActive) return;
-        
-        this.playSound(this.buttonSound);
-        this.isPaused = !this.isPaused;
-        
-        if (this.isPaused) {
-            // 暂停游戏
-            if (this.gameTimer) {
-                clearInterval(this.gameTimer);
-            }
-            this.gameMessage.textContent = '游戏已暂停！点击继续按钮恢复游戏。';
-            this.pauseButton.textContent = '继续';
-            
-            // 禁用游戏控制按钮
-            this.toothpasteGun.disabled = true;
-            this.toothbrushSword.disabled = true;
-            this.superCleaner.disabled = true;
-        } else {
-            // 继续游戏
-            this.startGameTimer();
-            this.gameMessage.textContent = '游戏继续！';
-            this.pauseButton.textContent = '暂停';
-            
-            // 启用游戏控制按钮
-            this.toothpasteGun.disabled = false;
-            this.toothbrushSword.disabled = false;
-            this.superCleaner.disabled = false;
-        }
     }
     
     clearGameArea() {
-        // 保留光泽效果元素
-        const shineEffect = this.toothModel.querySelector('.shine-effect');
         this.toothModel.innerHTML = '';
-        if (shineEffect) {
-            this.toothModel.appendChild(shineEffect);
-        }
         this.foodResidues = [];
         this.cavityBugs = [];
-        this.powerUps = [];
     }
     
     generateFoodResidues() {
@@ -434,70 +100,20 @@ class CavityBugGame {
             residue.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             residue.style.left = `${Math.random() * (this.toothModel.offsetWidth - 25)}px`;
             residue.style.top = `${Math.random() * (this.toothModel.offsetHeight - 25)}px`;
-            // 添加点击和触摸事件支持（增加点击区域）
-            residue.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.removeFoodResidue(residue);
-            });
+            // 添加点击和触摸事件支持
+            residue.addEventListener('click', () => this.removeFoodResidue(residue));
             residue.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 this.removeFoodResidue(residue);
             });
             
-            // 增加点击区域的视觉反馈
-            residue.style.cursor = 'pointer';
-            residue.style.transition = 'transform 0.2s ease';
-            residue.addEventListener('mouseover', () => {
-                residue.style.transform = 'scale(1.1)';
-            });
-            residue.addEventListener('mouseout', () => {
-                residue.style.transform = 'scale(1)';
-            });
-            
-            // 添加移动属性，根据关卡难度调整初始速度
-            const baseSpeed = 1.0;
-            const speedIncrease = (this.level - 1) * 0.1;
-            const maxBaseSpeed = 2.0;
-            const finalBaseSpeed = Math.min(baseSpeed + speedIncrease, maxBaseSpeed);
-            residue.speedX = (Math.random() - 0.5) * finalBaseSpeed;
-            residue.speedY = (Math.random() - 0.5) * finalBaseSpeed;
+            // 添加移动属性
+            residue.speedX = (Math.random() - 0.5) * 2;
+            residue.speedY = (Math.random() - 0.5) * 2;
             
             this.toothModel.appendChild(residue);
             this.foodResidues.push(residue);
         }
-        
-        // 添加空白区域点击事件，实现扣分机制
-        const handleBlankClick = (e) => {
-            if (!this.gameActive || this.isPaused) return;
-            
-            // 检查点击目标是否为空白区域
-            if (e.target === this.toothModel || e.target.className === 'shine-effect') {
-                this.deductScore(10); // 点击空白区域扣10分
-            }
-        };
-        
-        // 创建touchstart事件处理函数
-        const handleTouchStart = (e) => {
-            e.preventDefault();
-            handleBlankClick(e);
-        };
-        
-        // 移除旧的事件监听器，避免重复添加
-        if (this.blankClickHandler) {
-            this.toothModel.removeEventListener('click', this.blankClickHandler);
-        }
-        if (this.touchStartHandler) {
-            this.toothModel.removeEventListener('touchstart', this.touchStartHandler);
-        }
-        
-        // 保存当前的事件监听器引用
-        this.blankClickHandler = handleBlankClick;
-        this.touchStartHandler = handleTouchStart;
-        
-        // 添加新的事件监听器
-        this.toothModel.addEventListener('click', handleBlankClick);
-        this.toothModel.addEventListener('touchstart', handleTouchStart);
         
         // 启动食物残渣移动
         this.moveFoodResidues();
@@ -506,86 +122,47 @@ class CavityBugGame {
     moveFoodResidues() {
         if (!this.gameActive) return;
         
-        if (!this.isPaused) {
-            this.foodResidues.forEach(residue => {
-                if (!residue) return;
-                
-                let x = parseFloat(residue.style.left) || 0;
-                let y = parseFloat(residue.style.top) || 0;
-                
-                // 更新位置
-                x += residue.speedX;
-                y += residue.speedY;
-                
-                // 边界检测和反弹，增加内边距，避免在边缘浮动
-                const padding = 10;
-                const maxX = this.toothModel.offsetWidth - 25 - padding;
-                const maxY = this.toothModel.offsetHeight - 25 - padding;
-                
-                let collided = false;
-                
-                if (x < padding || x > maxX) {
-                    // 碰撞后改变路线和方向，不仅仅是简单的反弹
-                    residue.speedX = -residue.speedX * (0.7 + Math.random() * 0.4); // 随机阻尼
-                    residue.speedY += (Math.random() - 0.5) * 1.0; // 随机改变Y方向速度
-                    x = Math.max(padding, Math.min(maxX, x));
-                    collided = true;
-                }
-                
-                if (y < padding || y > maxY) {
-                    // 碰撞后改变路线和方向，不仅仅是简单的反弹
-                    residue.speedY = -residue.speedY * (0.7 + Math.random() * 0.4); // 随机阻尼
-                    residue.speedX += (Math.random() - 0.5) * 1.0; // 随机改变X方向速度
-                    y = Math.max(padding, Math.min(maxY, y));
-                    collided = true;
-                }
-                
-                // 碰撞后增加一些额外的随机性，使移动轨迹更自然
-                if (collided) {
-                    // 随机改变速度方向
-                    if (Math.random() < 0.3) {
-                        residue.speedX += (Math.random() - 0.5) * 0.8;
-                        residue.speedY += (Math.random() - 0.5) * 0.8;
-                    }
-                }
-                
-                // 随机改变速度，使移动更有趣和流畅
-                if (Math.random() < 0.01) {
-                    // 使用更平滑的速度变化，限制速度增长
-                    const speedFactor = 1 + (this.level * 0.05); // 减少速度增长系数
-                    residue.speedX += (Math.random() - 0.5) * 0.3;
-                    residue.speedY += (Math.random() - 0.5) * 0.3;
-                    
-                    // 限制最大速度，确保后期不会太快
-                    const maxSpeed = Math.min(2.5, 1.5 + (this.level * 0.1)); // 限制最大速度为2.5
-                    residue.speedX = Math.max(-maxSpeed, Math.min(maxSpeed, residue.speedX));
-                    residue.speedY = Math.max(-maxSpeed, Math.min(maxSpeed, residue.speedY));
-                }
-                
-                // 添加一些随机性，使移动轨迹更自然
-                if (Math.random() < 0.005) {
-                    const speedFactor = 1 + (this.level * 0.05); // 减少速度增长系数
-                    residue.speedX = (Math.random() - 0.5) * 1.5 * speedFactor;
-                    residue.speedY = (Math.random() - 0.5) * 1.5 * speedFactor;
-                }
-                
-                // 限制最大速度，确保后期不会太快
-                const maxSpeed = Math.min(2.5, 1.5 + (this.level * 0.1)); // 限制最大速度为2.5
-                residue.speedX = Math.max(-maxSpeed, Math.min(maxSpeed, residue.speedX));
-                residue.speedY = Math.max(-maxSpeed, Math.min(maxSpeed, residue.speedY));
-                
-                // 更新样式
-                residue.style.left = `${x}px`;
-                residue.style.top = `${y}px`;
-            });
-        }
+        this.foodResidues.forEach(residue => {
+            if (!residue) return;
+            
+            let x = parseFloat(residue.style.left) || 0;
+            let y = parseFloat(residue.style.top) || 0;
+            
+            // 更新位置
+            x += residue.speedX;
+            y += residue.speedY;
+            
+            // 边界检测和反弹
+            const maxX = this.toothModel.offsetWidth - 25;
+            const maxY = this.toothModel.offsetHeight - 25;
+            
+            if (x < 0 || x > maxX) {
+                residue.speedX = -residue.speedX;
+                x = Math.max(0, Math.min(maxX, x));
+            }
+            
+            if (y < 0 || y > maxY) {
+                residue.speedY = -residue.speedY;
+                y = Math.max(0, Math.min(maxY, y));
+            }
+            
+            // 随机改变速度，使移动更有趣
+            if (Math.random() < 0.02) {
+                residue.speedX = (Math.random() - 0.5) * 2;
+                residue.speedY = (Math.random() - 0.5) * 2;
+            }
+            
+            // 更新样式
+            residue.style.left = `${x}px`;
+            residue.style.top = `${y}px`;
+        });
         
-        // 继续移动，即使在暂停状态下也保持游戏循环
+        // 继续移动
         requestAnimationFrame(() => this.moveFoodResidues());
     }
     
-    removeFoodResidue(residue, isFromFoam = false) {
-        if (!this.gameActive || this.isPaused) return;
+    removeFoodResidue(residue) {
+        if (!this.gameActive) return;
         
         this.playSound(this.popSound);
         
@@ -600,14 +177,9 @@ class CavityBugGame {
         residue.remove();
         this.foodResidues = this.foodResidues.filter(r => r !== residue);
         
-        // 增加分数（牙膏泡沫枪击中只加1分）
-        const scoreGain = isFromFoam ? 1 : 10;
-        this.score += scoreGain;
+        // 增加分数
+        this.score += 10;
         this.updateDisplay();
-        this.showScoreChange(scoreGain);
-        
-        // 增加连击数
-        this.increaseCombo();
         
         // 检查是否清除完所有残渣
         if (this.foodResidues.length === 0) {
@@ -620,65 +192,15 @@ class CavityBugGame {
         const bugCount = this.level + 1;
         
         for (let i = 0; i < bugCount; i++) {
-            // 随机选择蛀牙虫类型
-            const bugType = Math.random() < 0.7 ? 'normal' : (Math.random() < 0.5 ? 'fast' : 'tough');
-            
             const bug = document.createElement('div');
             bug.className = 'cavity-bug';
             bug.style.left = `${Math.random() * (this.toothModel.offsetWidth - 35)}px`;
             bug.style.top = `${Math.random() * (this.toothModel.offsetHeight - 35)}px`;
-            
-            // 根据类型设置不同的样式和属性
-            const speedIncrease = (this.level - 1) * 0.1;
-            
-            if (bugType === 'fast') {
-                bug.style.backgroundColor = '#ff6b6b';
-                bug.style.width = '30px';
-                bug.style.height = '30px';
-                const maxSpeed = Math.min(3.0, 2.0 + speedIncrease);
-                bug.speedX = (Math.random() - 0.5) * maxSpeed;
-                bug.speedY = (Math.random() - 0.5) * maxSpeed;
-                bug.type = 'fast';
-                bug.health = 1;
-            } else if (bugType === 'tough') {
-                bug.style.backgroundColor = '#8b4513';
-                bug.style.width = '40px';
-                bug.style.height = '40px';
-                const maxSpeed = Math.min(1.5, 1.0 + speedIncrease);
-                bug.speedX = (Math.random() - 0.5) * maxSpeed;
-                bug.speedY = (Math.random() - 0.5) * maxSpeed;
-                bug.type = 'tough';
-                bug.health = 2;
-            } else {
-                bug.style.backgroundColor = '#8b5a2b';
-                bug.style.width = '35px';
-                bug.style.height = '35px';
-                const maxSpeed = Math.min(2.0, 1.5 + speedIncrease);
-                bug.speedX = (Math.random() - 0.5) * maxSpeed;
-                bug.speedY = (Math.random() - 0.5) * maxSpeed;
-                bug.type = 'normal';
-                bug.health = 1;
-            }
-            
-            // 添加点击和触摸事件支持（增加点击区域）
-            bug.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.attackCavityBug(bug);
-            });
+            // 添加点击和触摸事件支持
+            bug.addEventListener('click', () => this.attackCavityBug(bug));
             bug.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 this.attackCavityBug(bug);
-            });
-            
-            // 增加点击区域的视觉反馈
-            bug.style.cursor = 'pointer';
-            bug.style.transition = 'transform 0.2s ease';
-            bug.addEventListener('mouseover', () => {
-                bug.style.transform = 'scale(1.1)';
-            });
-            bug.addEventListener('mouseout', () => {
-                bug.style.transform = 'scale(1)';
             });
             
             // 添加嘴巴元素
@@ -686,6 +208,8 @@ class CavityBugGame {
             bug.appendChild(mouth);
             
             // 添加移动属性
+            bug.speedX = (Math.random() - 0.5) * 1.5;
+            bug.speedY = (Math.random() - 0.5) * 1.5;
             bug.wiggleDirection = 1;
             bug.wiggleCount = 0;
             
@@ -693,309 +217,69 @@ class CavityBugGame {
             this.cavityBugs.push(bug);
         }
         
-        // 随机生成道具
-        if (Math.random() < 0.5) {
-            this.generatePowerUp();
-        }
-        
-        this.gameMessage.textContent = `击败所有${bugCount}只蛀牙虫！注意不同类型的蛀牙虫有不同的特点！`;
+        this.gameMessage.textContent = `击败所有${bugCount}只蛀牙虫！`;
         
         // 启动蛀牙虫移动
         this.moveCavityBugs();
     }
     
-    generatePowerUp() {
-        const powerUp = document.createElement('div');
-        powerUp.className = 'power-up';
-        powerUp.style.left = `${Math.random() * (this.toothModel.offsetWidth - 30)}px`;
-        powerUp.style.top = `${Math.random() * (this.toothModel.offsetHeight - 30)}px`;
-        powerUp.style.width = '30px';
-        powerUp.style.height = '30px';
-        powerUp.style.borderRadius = '50%';
-        powerUp.style.backgroundColor = '#ffd700';
-        powerUp.style.display = 'flex';
-        powerUp.style.alignItems = 'center';
-        powerUp.style.justifyContent = 'center';
-        powerUp.style.fontSize = '18px';
-        powerUp.style.cursor = 'pointer';
-        powerUp.style.animation = 'bounce 1s infinite alternate';
-        powerUp.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.8)';
-        
-        // 随机选择道具类型
-        const powerUpType = Math.random() < 0.5 ? 'score' : 'time';
-        powerUp.textContent = powerUpType === 'score' ? '+' : '⏱';
-        powerUp.type = powerUpType;
-        
-        // 添加点击和触摸事件支持
-        powerUp.addEventListener('click', () => this.collectPowerUp(powerUp));
-        powerUp.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.collectPowerUp(powerUp);
-        });
-        
-        this.toothModel.appendChild(powerUp);
-        this.powerUps.push(powerUp);
-        
-        // 30秒后自动消失
-        setTimeout(() => {
-            if (powerUp && powerUp.parentNode) {
-                powerUp.remove();
-                this.powerUps = this.powerUps.filter(p => p !== powerUp);
-            }
-        }, 30000);
-    }
-    
-    collectPowerUp(powerUp) {
-        if (!this.gameActive) return;
-        
-        this.playSound(this.winSound);
-        
-        // 创建收集效果
-        const effect = document.createElement('div');
-        effect.style.position = 'absolute';
-        effect.style.left = powerUp.style.left;
-        effect.style.top = powerUp.style.top;
-        effect.style.width = '40px';
-        effect.style.height = '40px';
-        effect.style.borderRadius = '50%';
-        effect.style.backgroundColor = '#ffd700';
-        effect.style.animation = 'explosion 0.5s ease-out forwards';
-        this.toothModel.appendChild(effect);
-        
-        // 根据道具类型执行不同效果
-        if (powerUp.type === 'score') {
-            this.score += 50;
-            this.gameMessage.textContent = '获得额外分数！';
-        } else if (powerUp.type === 'time') {
-            // 这里可以添加时间奖励逻辑
-            this.gameMessage.textContent = '获得时间奖励！';
-        }
-        
-        // 移除道具
-        powerUp.remove();
-        this.powerUps = this.powerUps.filter(p => p !== powerUp);
-        
-        // 更新分数显示
-        this.updateDisplay();
-        
-        // 自动移除效果
-        setTimeout(() => effect.remove(), 500);
-    }
-    
     moveCavityBugs() {
         if (!this.gameActive) return;
         
-        if (!this.isPaused) {
-            this.cavityBugs.forEach(bug => {
-                if (!bug) return;
-                
-                let x = parseFloat(bug.style.left) || 0;
-                let y = parseFloat(bug.style.top) || 0;
-                
-                // 更新位置
-                x += bug.speedX;
-                y += bug.speedY;
-                
-                // 边界检测和反弹，增加内边距，避免在边缘浮动
-                const padding = 10;
-                const bugWidth = bug.type === 'tough' ? 40 : (bug.type === 'fast' ? 30 : 35);
-                const maxX = this.toothModel.offsetWidth - bugWidth - padding;
-                const maxY = this.toothModel.offsetHeight - bugWidth - padding;
-                
-                let collided = false;
-                
-                if (x < padding || x > maxX) {
-                    // 碰撞后改变路线和方向，不仅仅是简单的反弹
-                    bug.speedX = -bug.speedX * (0.7 + Math.random() * 0.4); // 随机阻尼
-                    bug.speedY += (Math.random() - 0.5) * 1.0; // 随机改变Y方向速度
-                    x = Math.max(padding, Math.min(maxX, x));
-                    collided = true;
-                }
-                
-                if (y < padding || y > maxY) {
-                    // 碰撞后改变路线和方向，不仅仅是简单的反弹
-                    bug.speedY = -bug.speedY * (0.7 + Math.random() * 0.4); // 随机阻尼
-                    bug.speedX += (Math.random() - 0.5) * 1.0; // 随机改变X方向速度
-                    y = Math.max(padding, Math.min(maxY, y));
-                    collided = true;
-                }
-                
-                // 碰撞后增加一些额外的随机性，使移动轨迹更自然
-                if (collided) {
-                    // 随机改变速度方向
-                    if (Math.random() < 0.3) {
-                        if (bug.type === 'fast') {
-                            bug.speedX += (Math.random() - 0.5) * 0.6;
-                            bug.speedY += (Math.random() - 0.5) * 0.6;
-                        } else if (bug.type === 'tough') {
-                            bug.speedX += (Math.random() - 0.5) * 0.3;
-                            bug.speedY += (Math.random() - 0.5) * 0.3;
-                        } else {
-                            bug.speedX += (Math.random() - 0.5) * 0.4;
-                            bug.speedY += (Math.random() - 0.5) * 0.4;
-                        }
-                    }
-                }
-                
-                // 随机改变速度，使移动更有趣和流畅
-                if (Math.random() < 0.02) {
-                    // 使用更平滑的速度变化，限制速度增长
-                    const speedFactor = 1 + (this.level * 0.05); // 减少速度增长系数
-                    
-                    if (bug.type === 'fast') {
-                        bug.speedX += (Math.random() - 0.5) * 0.6;
-                        bug.speedY += (Math.random() - 0.5) * 0.6;
-                        // 限制最大速度，确保后期不会太快
-                        const maxSpeed = Math.min(2.5, 2 + (this.level * 0.1)); // 限制最大速度为2.5
-                        bug.speedX = Math.max(-maxSpeed, Math.min(maxSpeed, bug.speedX));
-                        bug.speedY = Math.max(-maxSpeed, Math.min(maxSpeed, bug.speedY));
-                    } else if (bug.type === 'tough') {
-                        bug.speedX += (Math.random() - 0.5) * 0.3;
-                        bug.speedY += (Math.random() - 0.5) * 0.3;
-                        // 限制最大速度
-                        const maxSpeed = Math.min(1.5, 1 + (this.level * 0.05)); // 限制最大速度为1.5
-                        bug.speedX = Math.max(-maxSpeed, Math.min(maxSpeed, bug.speedX));
-                        bug.speedY = Math.max(-maxSpeed, Math.min(maxSpeed, bug.speedY));
-                    } else {
-                        bug.speedX += (Math.random() - 0.5) * 0.4;
-                        bug.speedY += (Math.random() - 0.5) * 0.4;
-                        // 限制最大速度
-                        const maxSpeed = Math.min(2, 1.2 + (this.level * 0.08)); // 限制最大速度为2
-                        bug.speedX = Math.max(-maxSpeed, Math.min(maxSpeed, bug.speedX));
-                        bug.speedY = Math.max(-maxSpeed, Math.min(maxSpeed, bug.speedY));
-                    }
-                }
-                
-                // 添加一些随机性，使移动轨迹更自然
-                if (Math.random() < 0.01) {
-                    const speedFactor = 1 + (this.level * 0.05); // 减少速度增长系数
-                    
-                    if (bug.type === 'fast') {
-                        bug.speedX = (Math.random() - 0.5) * 2 * speedFactor;
-                        bug.speedY = (Math.random() - 0.5) * 2 * speedFactor;
-                    } else if (bug.type === 'tough') {
-                        bug.speedX = (Math.random() - 0.5) * 0.8 * speedFactor;
-                        bug.speedY = (Math.random() - 0.5) * 0.8 * speedFactor;
-                    } else {
-                        bug.speedX = (Math.random() - 0.5) * 1.2 * speedFactor;
-                        bug.speedY = (Math.random() - 0.5) * 1.2 * speedFactor;
-                    }
-                }
-                
-                // 增加摆动效果
-                bug.wiggleCount++;
-                if (bug.wiggleCount > 20) {
-                    bug.wiggleDirection = -bug.wiggleDirection;
-                    bug.wiggleCount = 0;
-                }
-                
-                // 应用摆动变换
-                const wiggleAngle = bug.wiggleDirection * 5;
-                bug.style.transform = `rotate(${wiggleAngle}deg)`;
-                
-                // 更新样式
-                bug.style.left = `${x}px`;
-                bug.style.top = `${y}px`;
-            });
+        this.cavityBugs.forEach(bug => {
+            if (!bug) return;
             
-            // 检查蛀牙虫是否存在时间过长
-            this.checkCavityBugDuration();
-        }
+            let x = parseFloat(bug.style.left) || 0;
+            let y = parseFloat(bug.style.top) || 0;
+            
+            // 更新位置
+            x += bug.speedX;
+            y += bug.speedY;
+            
+            // 边界检测和反弹
+            const maxX = this.toothModel.offsetWidth - 35;
+            const maxY = this.toothModel.offsetHeight - 35;
+            
+            if (x < 0 || x > maxX) {
+                bug.speedX = -bug.speedX;
+                x = Math.max(0, Math.min(maxX, x));
+            }
+            
+            if (y < 0 || y > maxY) {
+                bug.speedY = -bug.speedY;
+                y = Math.max(0, Math.min(maxY, y));
+            }
+            
+            // 随机改变速度，使移动更有趣
+            if (Math.random() < 0.03) {
+                bug.speedX = (Math.random() - 0.5) * 1.5;
+                bug.speedY = (Math.random() - 0.5) * 1.5;
+            }
+            
+            // 增加摆动效果
+            bug.wiggleCount++;
+            if (bug.wiggleCount > 20) {
+                bug.wiggleDirection = -bug.wiggleDirection;
+                bug.wiggleCount = 0;
+            }
+            
+            // 应用摆动变换
+            const wiggleAngle = bug.wiggleDirection * 5;
+            bug.style.transform = `rotate(${wiggleAngle}deg)`;
+            
+            // 更新样式
+            bug.style.left = `${x}px`;
+            bug.style.top = `${y}px`;
+        });
         
-        // 继续移动，即使在暂停状态下也保持游戏循环
+        // 继续移动
         requestAnimationFrame(() => this.moveCavityBugs());
     }
     
-    checkCavityBugDuration() {
-        // 根据关卡调整触发阈值
-        const threshold = 3 + this.level;
-        
-        // 检查是否需要减少生命值
-        if (this.cavityBugs.length > threshold) {
-            // 检查是否在冷却时间内
-            const now = Date.now();
-            if (!this.lastLifeLossTime || now - this.lastLifeLossTime > 3000) { // 3秒冷却时间
-                this.lives--;
-                this.updateDisplay();
-                this.lastLifeLossTime = now;
-                
-                // 播放生命值减少的音效
-                this.playSound(this.buttonSound);
-                
-                // 创建生命值减少的视觉效果
-                const lifeLossEffect = document.createElement('div');
-                lifeLossEffect.style.position = 'absolute';
-                lifeLossEffect.style.left = `${this.toothModel.offsetWidth / 2 - 50}px`;
-                lifeLossEffect.style.top = `${this.toothModel.offsetHeight / 2 - 20}px`;
-                lifeLossEffect.style.fontSize = '30px';
-                lifeLossEffect.style.fontWeight = 'bold';
-                lifeLossEffect.style.color = 'red';
-                lifeLossEffect.style.animation = 'lifeLoss 1s ease-out forwards';
-                lifeLossEffect.textContent = '-1生命';
-                this.toothModel.appendChild(lifeLossEffect);
-                
-                // 添加生命值减少动画
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes lifeLoss {
-                        0% { transform: scale(0); opacity: 1; }
-                        50% { transform: scale(1.5); opacity: 0.8; }
-                        100% { transform: scale(1); opacity: 0; }
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                // 自动移除效果
-                setTimeout(() => {
-                    lifeLossEffect.remove();
-                    style.remove();
-                }, 1000);
-                
-                // 检查生命值是否耗尽
-                if (this.lives <= 0) {
-                    this.gameOver('生命值耗尽！游戏结束！');
-                } else {
-                    this.gameMessage.textContent = `蛀牙虫太多了！失去一条生命！还剩${this.lives}条生命！`;
-                    
-                    // 清除一半的蛀牙虫
-                    const bugsToRemove = [...this.cavityBugs].sort(() => Math.random() - 0.5).slice(0, Math.floor(this.cavityBugs.length / 2));
-                    bugsToRemove.forEach(bug => {
-                        if (bug) {
-                            // 创建爆炸效果
-                            const explosion = document.createElement('div');
-                            explosion.className = 'explosion';
-                            explosion.style.left = bug.style.left;
-                            explosion.style.top = bug.style.top;
-                            this.toothModel.appendChild(explosion);
-                            
-                            // 移除蛀牙虫
-                            bug.remove();
-                        }
-                    });
-                    
-                    // 更新蛀牙虫数组
-                    this.cavityBugs = this.cavityBugs.filter(bug => !bugsToRemove.includes(bug));
-                }
-            } else if (!this.warningGiven) {
-                // 给予警告
-                this.gameMessage.textContent = `警告！蛀牙虫太多了！请尽快清除它们！`;
-                this.warningGiven = true;
-                
-                // 3秒后重置警告状态
-                setTimeout(() => {
-                    this.warningGiven = false;
-                }, 3000);
-            }
-        }
-    }
-    
-    attackCavityBug(bug, isFromFoam = false) {
-        if (!this.gameActive || this.isPaused) return;
+    attackCavityBug(bug) {
+        if (!this.gameActive) return;
         
         this.playSound(this.popSound);
-        
-        // 减少蛀牙虫生命值
-        bug.health--;
         
         // 创建爆炸效果
         const explosion = document.createElement('div');
@@ -1004,350 +288,108 @@ class CavityBugGame {
         explosion.style.top = bug.style.top;
         this.toothModel.appendChild(explosion);
         
-        // 检查是否击败蛀牙虫
-        if (bug.health <= 0) {
-            // 移除蛀牙虫
-            bug.remove();
-            this.cavityBugs = this.cavityBugs.filter(b => b !== bug);
-            
-            // 根据类型增加不同分数（牙膏泡沫枪击中只加1分）
-            let scoreValue = isFromFoam ? 1 : 50;
-            if (!isFromFoam) {
-                if (bug.type === 'fast') {
-                    scoreValue = 70;
-                } else if (bug.type === 'tough') {
-                    scoreValue = 100;
-                }
-            }
-            
-            this.score += scoreValue;
-            this.updateDisplay();
-            this.showScoreChange(scoreValue);
-            
-            // 增加连击数
-            this.increaseCombo();
-            
-            // 检查是否击败所有蛀牙虫
-            if (this.cavityBugs.length === 0) {
-                this.playSound(this.winSound);
-                this.gameMessage.textContent = '太棒了！所有蛀牙虫都被击败了！';
-                setTimeout(() => this.nextLevel(), 1500);
-            }
-        } else {
-            // 显示受伤效果
-            bug.style.opacity = '0.6';
-            setTimeout(() => {
-                if (bug) bug.style.opacity = '1';
-            }, 300);
+        // 移除蛀牙虫
+        bug.remove();
+        this.cavityBugs = this.cavityBugs.filter(b => b !== bug);
+        
+        // 增加分数
+        this.score += 50;
+        this.updateDisplay();
+        
+        // 检查是否击败所有蛀牙虫
+        if (this.cavityBugs.length === 0) {
+            this.playSound(this.winSound);
+            this.gameMessage.textContent = '太棒了！所有蛀牙虫都被击败了！';
+            setTimeout(() => this.nextLevel(), 1500);
         }
     }
     
     useToothpasteGun() {
-        if (!this.gameActive || this.isPaused) return;
-        
-        // 检查是否正在使用牙膏泡沫枪
-        if (this.isUsingToothpasteGun) {
-            return;
-        }
-        
-        // 检查分数是否足够
-        const cost = 30; // 增加使用成本
-        if (this.score < cost) {
-            this.gameMessage.textContent = `分数不足！需要${cost}分才能使用牙膏泡沫枪。`;
-            return;
-        }
-        
-        // 扣除分数
-        this.score -= cost;
-        this.updateDisplay();
-        this.showScoreChange(-cost);
+        if (!this.gameActive) return;
         
         this.playSound(this.buttonSound);
         
-        // 设置武器使用状态
-        this.isUsingToothpasteGun = true;
-        
-        // 提示玩家选择释放位置
-        this.gameMessage.textContent = '点击屏幕选择牙膏泡沫枪释放位置！';
-        
-        // 添加临时点击事件监听器
-        const handleClick = (e) => {
-            if (!this.gameActive || this.isPaused) return;
-            
-            // 移除事件监听器
-            this.toothModel.removeEventListener('click', handleClick);
-            this.toothModel.removeEventListener('touchstart', handleClick);
-            
-            // 获取点击位置
-            const rect = this.toothModel.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // 创建牙膏泡沫效果，从点击位置向四周扩散（减少泡沫数量）
-            for (let i = 0; i < 6; i++) {
-                setTimeout(() => {
-                    const foam = document.createElement('div');
-                    foam.className = 'foam';
-                    foam.style.left = `${x}px`;
-                    foam.style.top = `${y}px`;
-                    foam.style.width = `${Math.random() * 8 + 8}px`; // 缩小泡沫大小
-                    foam.style.height = `${Math.random() * 8 + 8}px`; // 缩小泡沫大小
-                    foam.style.opacity = `${Math.random() * 0.5 + 0.5}`;
-                    this.toothModel.appendChild(foam);
-                    
-                    // 泡沫移动（降低移动速度）
-                    const angle = (Math.PI * 2 * i) / 6;
-                    const speedX = Math.cos(angle) * 2; // 降低移动速度
-                    const speedY = Math.sin(angle) * 2; // 降低移动速度
-                    let currentX = x;
-                    let currentY = y;
-                    
-                    const moveFoam = () => {
-                        if (!foam || this.isPaused) return;
-                        currentX += speedX;
-                        currentY += speedY;
-                        foam.style.left = `${currentX}px`;
-                        foam.style.top = `${currentY}px`;
-                        
-                        // 检查是否接触到食物残渣
-                        this.checkFoamCollision(foam);
-                        
-                        // 边界检测
-                        if (currentX < 0 || currentX > this.toothModel.offsetWidth || currentY < 0 || currentY > this.toothModel.offsetHeight) {
-                            foam.remove();
-                            return;
-                        }
-                        
-                        requestAnimationFrame(moveFoam);
-                    };
-                    moveFoam();
-                    
-                    // 自动移除泡沫
-                    setTimeout(() => foam.remove(), 1500); // 缩短泡沫存在时间
-                }, i * 150);
-            }
-            
-            // 重置武器使用状态
+        // 创建牙膏泡沫效果
+        for (let i = 0; i < 10; i++) {
             setTimeout(() => {
-                this.isUsingToothpasteGun = false;
-                this.gameMessage.textContent = '发射牙膏泡沫！';
-            }, 100);
-        };
+                const foam = document.createElement('div');
+                foam.className = 'foam';
+                foam.style.left = `${Math.random() * (this.toothModel.offsetWidth - 20)}px`;
+                foam.style.top = `${this.toothModel.offsetHeight - 20}px`;
+                foam.style.width = `${Math.random() * 10 + 10}px`;
+                foam.style.height = `${Math.random() * 10 + 10}px`;
+                foam.style.opacity = `${Math.random() * 0.5 + 0.5}`;
+                foam.style.animation = `float ${Math.random() * 1 + 1.5}s ease-out forwards`;
+                this.toothModel.appendChild(foam);
+                
+                // 泡沫移动
+                const speedX = (Math.random() - 0.5) * 2;
+                let x = parseFloat(foam.style.left);
+                
+                const moveFoam = () => {
+                    if (!foam) return;
+                    x += speedX;
+                    foam.style.left = `${x}px`;
+                    requestAnimationFrame(moveFoam);
+                };
+                moveFoam();
+                
+                // 自动移除泡沫
+                setTimeout(() => foam.remove(), 2000);
+            }, i * 150);
+        }
         
-        // 添加事件监听器
-        this.toothModel.addEventListener('click', handleClick);
-        this.toothModel.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleClick(e);
-        });
-        
-        // 设置超时，防止用户长时间不点击导致武器无法使用
-        setTimeout(() => {
-            if (this.isUsingToothpasteGun) {
-                this.toothModel.removeEventListener('click', handleClick);
-                this.toothModel.removeEventListener('touchstart', handleClick);
-                this.isUsingToothpasteGun = false;
-                this.gameMessage.textContent = '';
-            }
-        }, 5000);
-    }
-    
-    checkFoamCollision(foam) {
-        // 检查食物残渣碰撞
-        this.foodResidues.forEach(residue => {
-            if (!residue || !foam) return;
-            
-            const foamRect = foam.getBoundingClientRect();
-            const residueRect = residue.getBoundingClientRect();
-            
-            // 简单的碰撞检测
-            if (foamRect.left < residueRect.right && 
-                foamRect.right > residueRect.left && 
-                foamRect.top < residueRect.bottom && 
-                foamRect.bottom > residueRect.top) {
-                // 移除残渣（牙膏泡沫枪击中只加1分）
-                this.removeFoodResidue(residue, true);
-            }
-        });
-        
-        // 检查蛀牙虫碰撞
-        this.cavityBugs.forEach(bug => {
-            if (!bug || !foam) return;
-            
-            const foamRect = foam.getBoundingClientRect();
-            const bugRect = bug.getBoundingClientRect();
-            
-            // 简单的碰撞检测
-            if (foamRect.left < bugRect.right && 
-                foamRect.right > bugRect.left && 
-                foamRect.top < bugRect.bottom && 
-                foamRect.bottom > bugRect.top) {
-                // 攻击蛀牙虫（牙膏泡沫枪击中只加1分）
-                this.attackCavityBug(bug, true);
-            }
-        });
+        this.gameMessage.textContent = '发射牙膏泡沫！';
     }
     
     useToothbrushSword() {
-        if (!this.gameActive || this.isPaused) return;
-        
-        // 检查是否正在使用牙刷剑
-        if (this.isUsingToothbrushSword) {
-            return;
-        }
-        
-        // 检查分数是否足够
-        const cost = 30;
-        if (this.score < cost) {
-            this.gameMessage.textContent = `分数不足！需要${cost}分才能使用牙刷剑。`;
-            return;
-        }
-        
-        // 扣除分数
-        this.score -= cost;
-        this.updateDisplay();
-        this.showScoreChange(-cost);
+        if (!this.gameActive) return;
         
         this.playSound(this.buttonSound);
         
-        // 设置武器使用状态
-        this.isUsingToothbrushSword = true;
+        // 创建多个剑击效果，从不同方向攻击
+        const directions = [0, 45, 90, 135, 180];
         
-        // 提示玩家选择释放方向
-        this.gameMessage.textContent = '点击屏幕选择牙刷剑释放方向！';
-        
-        // 添加临时点击事件监听器
-        const handleClick = (e) => {
-            if (!this.gameActive || this.isPaused) return;
-            
-            // 移除事件监听器
-            this.toothModel.removeEventListener('click', handleClick);
-            this.toothModel.removeEventListener('touchstart', handleClick);
-            
-            // 获取点击位置
-            const rect = this.toothModel.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // 计算牙刷剑的起始位置和方向
-            const centerX = this.toothModel.offsetWidth / 2;
-            const centerY = this.toothModel.offsetHeight / 2;
-            const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
-            
-            // 创建牙刷剑效果
-            const swordEffect = document.createElement('div');
-            swordEffect.style.position = 'absolute';
-            swordEffect.style.width = '150px';
-            swordEffect.style.height = '12px';
-            swordEffect.style.backgroundColor = '#ff6b6b';
-            swordEffect.style.left = `${centerX}px`;
-            swordEffect.style.top = `${centerY}px`;
-            swordEffect.style.borderRadius = '6px';
-            swordEffect.style.transformOrigin = 'left center';
-            swordEffect.style.transform = `rotate(${angle}deg) scale(0)`;
-            swordEffect.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.8)';
-            swordEffect.style.animation = 'swordSwing 0.6s ease-out forwards';
-            this.toothModel.appendChild(swordEffect);
-            
-            // 添加剑击动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes swordSwing {
-                    0% { transform: rotate(${angle}deg) scale(0); opacity: 1; }
-                    50% { transform: rotate(${angle + 90}deg) scale(1.5); opacity: 1; box-shadow: 0 0 20px rgba(255, 107, 107, 1); }
-                    100% { transform: rotate(${angle + 180}deg) scale(0); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // 检查剑击效果的碰撞
-            let animationFrame;
-            const checkCollision = () => {
-                if (!swordEffect || this.isPaused) return;
-                
-                const swordRect = swordEffect.getBoundingClientRect();
-                
-                // 检查食物残渣碰撞
-                this.foodResidues.forEach(residue => {
-                    if (!residue) return;
-                    
-                    const residueRect = residue.getBoundingClientRect();
-                    
-                    // 简单的碰撞检测
-                    if (swordRect.left < residueRect.right && 
-                        swordRect.right > residueRect.left && 
-                        swordRect.top < residueRect.bottom && 
-                        swordRect.bottom > residueRect.top) {
-                        // 移除残渣
-                        this.removeFoodResidue(residue);
-                    }
-                });
-                
-                // 检查蛀牙虫碰撞
-                this.cavityBugs.forEach(bug => {
-                    if (!bug) return;
-                    
-                    const bugRect = bug.getBoundingClientRect();
-                    
-                    // 简单的碰撞检测
-                    if (swordRect.left < bugRect.right && 
-                        swordRect.right > bugRect.left && 
-                        swordRect.top < bugRect.bottom && 
-                        swordRect.bottom > bugRect.top) {
-                        // 攻击蛀牙虫
-                        this.attackCavityBug(bug);
-                    }
-                });
-                
-                animationFrame = requestAnimationFrame(checkCollision);
-            };
-            
-            checkCollision();
-            
-            // 自动移除剑击效果
+        directions.forEach((angle, index) => {
             setTimeout(() => {
-                if (swordEffect) swordEffect.remove();
-                style.remove();
-                cancelAnimationFrame(animationFrame);
+                const swordEffect = document.createElement('div');
+                swordEffect.style.position = 'absolute';
+                swordEffect.style.width = '120px';
+                swordEffect.style.height = '12px';
+                swordEffect.style.backgroundColor = '#ff6b6b';
+                swordEffect.style.left = `${this.toothModel.offsetWidth / 2}px`;
+                swordEffect.style.top = `${this.toothModel.offsetHeight / 2}px`;
+                swordEffect.style.borderRadius = '6px';
+                swordEffect.style.transformOrigin = 'left center';
+                swordEffect.style.transform = `rotate(${angle}deg) scale(0)`;
+                swordEffect.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.8)';
+                swordEffect.style.animation = 'swordSwing 0.6s ease-out forwards';
+                this.toothModel.appendChild(swordEffect);
                 
-                // 重置武器使用状态
-                this.isUsingToothbrushSword = false;
-                this.gameMessage.textContent = '使用牙刷剑！';
-            }, 600);
-        };
-        
-        // 添加事件监听器
-        this.toothModel.addEventListener('click', handleClick);
-        this.toothModel.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleClick(e);
+                // 添加剑击动画
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes swordSwing {
+                        0% { transform: rotate(${angle}deg) scale(0); opacity: 1; }
+                        50% { transform: rotate(${angle + 90}deg) scale(1.3); opacity: 1; box-shadow: 0 0 20px rgba(255, 107, 107, 1); }
+                        100% { transform: rotate(${angle + 180}deg) scale(0); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // 自动移除剑击效果
+                setTimeout(() => {
+                    if (swordEffect) swordEffect.remove();
+                    style.remove();
+                }, 600);
+            }, index * 100);
         });
         
-        // 设置超时，防止用户长时间不点击导致武器无法使用
-        setTimeout(() => {
-            if (this.isUsingToothbrushSword) {
-                this.toothModel.removeEventListener('click', handleClick);
-                this.toothModel.removeEventListener('touchstart', handleClick);
-                this.isUsingToothbrushSword = false;
-                this.gameMessage.textContent = '';
-            }
-        }, 5000);
+        this.gameMessage.textContent = '使用牙刷剑！';
     }
     
     useSuperCleaner() {
-        if (!this.gameActive || this.isPaused) return;
-        
-        // 检查分数是否足够
-        const cost = 50;
-        if (this.score < cost) {
-            this.gameMessage.textContent = `分数不足！需要${cost}分才能使用超级清洁剂。`;
-            return;
-        }
-        
-        // 扣除分数
-        this.score -= cost;
-        this.updateDisplay();
-        this.showScoreChange(-cost);
+        if (!this.gameActive) return;
         
         this.playSound(this.winSound);
         
@@ -1372,14 +414,8 @@ class CavityBugGame {
         `;
         document.head.appendChild(style);
         
-        // 限制清除数量，只清除一部分食物残渣
-        const maxCleanCount = Math.min(5 + this.level, this.foodResidues.length);
-        let cleanedCount = 0;
-        
-        // 随机选择食物残渣进行清除
-        const residuesToClean = [...this.foodResidues].sort(() => Math.random() - 0.5).slice(0, maxCleanCount);
-        
-        residuesToClean.forEach(residue => {
+        // 清除所有食物残渣
+        this.foodResidues.forEach(residue => {
             if (residue) {
                 // 创建爆炸效果
                 const explosion = document.createElement('div');
@@ -1390,21 +426,19 @@ class CavityBugGame {
                 
                 // 移除残渣
                 residue.remove();
-                cleanedCount++;
             }
         });
         
-        // 更新食物残渣数组
-        this.foodResidues = this.foodResidues.filter(r => !residuesToClean.includes(r));
+        // 清空食物残渣数组
+        const residueCount = this.foodResidues.length;
+        this.foodResidues = [];
         
         // 增加分数
-        this.score += cleanedCount * 10;
+        this.score += residueCount * 10;
         this.updateDisplay();
         
         // 自动移除清洁效果
         setTimeout(() => {
-            if (this.isPaused) return;
-            
             cleanerEffect.remove();
             style.remove();
             
@@ -1412,8 +446,6 @@ class CavityBugGame {
             if (this.foodResidues.length === 0) {
                 this.gameMessage.textContent = '食物残渣已清除！现在准备对抗蛀牙虫！';
                 setTimeout(() => this.generateCavityBugs(), 1000);
-            } else {
-                this.gameMessage.textContent = `超级清洁剂清除了${cleanedCount}个食物残渣！`;
             }
         }, 1000);
         
@@ -1421,56 +453,6 @@ class CavityBugGame {
     }
     
     nextLevel() {
-        // 检查是否达到分数要求
-        const requiredScore = this.getScoreRequirement();
-        if (this.score < requiredScore) {
-            // 分数不足，扣减生命值
-            this.lives--;
-            this.updateDisplay();
-            
-            // 播放生命值减少的音效
-            this.playSound(this.buttonSound);
-            
-            // 创建生命值减少的视觉效果
-            const lifeLossEffect = document.createElement('div');
-            lifeLossEffect.style.position = 'absolute';
-            lifeLossEffect.style.left = `${this.toothModel.offsetWidth / 2 - 50}px`;
-            lifeLossEffect.style.top = `${this.toothModel.offsetHeight / 2 - 20}px`;
-            lifeLossEffect.style.fontSize = '30px';
-            lifeLossEffect.style.fontWeight = 'bold';
-            lifeLossEffect.style.color = 'red';
-            lifeLossEffect.style.animation = 'lifeLoss 1s ease-out forwards';
-            lifeLossEffect.textContent = '-1生命';
-            this.toothModel.appendChild(lifeLossEffect);
-            
-            // 添加生命值减少动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes lifeLoss {
-                    0% { transform: scale(0); opacity: 1; }
-                    50% { transform: scale(1.5); opacity: 0.8; }
-                    100% { transform: scale(1); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // 自动移除效果
-            setTimeout(() => {
-                lifeLossEffect.remove();
-                style.remove();
-            }, 1000);
-            
-            // 检查生命值是否耗尽
-            if (this.lives <= 0) {
-                this.gameOver('生命值耗尽！游戏结束！');
-                return;
-            }
-            
-            // 显示分数不足和扣生命值的提示
-            this.gameMessage.textContent = `分数不足！需要${requiredScore}分才能进入下一关。扣除1次生命，还剩${this.lives}次生命！`;
-            return;
-        }
-        
         // 根据得分给予评价
         let evaluation = '';
         if (this.score >= 300) {
@@ -1484,116 +466,300 @@ class CavityBugGame {
             this.playSound(this.buttonSound);
         }
         
-        // 检查是否达到分数要求
-        this.checkScoreRequirement();
-        
         this.gameMessage.textContent = `${evaluation}\n恭喜进入第${this.level + 1}关！`;
         
         this.level++;
-        
-        // 重置时间，每关减少5秒，最低30秒
-        this.timeLeft = Math.max(30, 60 - (this.level - 1) * 5);
         
         // 重置游戏区域并开始新关卡
         setTimeout(() => {
             this.clearGameArea();
             this.generateFoodResidues();
             this.updateDisplay();
-            this.startGameTimer();
         }, 2000);
     }
     
     updateDisplay() {
         this.levelDisplay.textContent = `关卡: ${this.level}`;
         this.scoreDisplay.textContent = `分数: ${this.score}`;
-        this.timeDisplay.textContent = `时间: ${this.timeLeft}s`;
-        this.livesDisplay.textContent = `生命: ${this.lives}`;
+    }
+}
+
+// 页面切换功能
+function initPageNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
+    const pages = document.querySelectorAll('.page');
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const targetPage = item.getAttribute('data-page');
+            
+            // 更新导航栏状态
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+            
+            // 切换页面
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(targetPage).classList.add('active');
+        });
         
-        // 更新分数要求显示
-        if (this.scoreRequirementDisplay) {
-            const nextRequirement = this.getScoreRequirement();
-            this.scoreRequirementDisplay.textContent = `分数要求: ${nextRequirement}`;
-        }
-    }
-    
-    getScoreRequirement() {
-        // 根据关卡计算阶段性分数要求，使用指数增长方式，使难度逐渐提高
-        return Math.floor(100 * Math.pow(1.5, this.level - 1));
-    }
-    
-    checkScoreRequirement() {
-        // 检查是否达到分数要求
-        const requiredScore = this.getScoreRequirement();
-        if (this.score >= requiredScore) {
-            this.gameMessage.textContent = `太棒了！达到了本关卡的分数要求：${requiredScore}分！`;
-        }
-    }
-    
-    deductScore(amount) {
-        // 扣分机制
-        if (this.score >= amount) {
-            this.score -= amount;
-            this.updateDisplay();
-            this.showScoreChange(-amount);
-            this.gameMessage.textContent = `扣分！-${amount}分`;
-        }
-    }
-    
-    showScoreChange(amount) {
-        // 显示分数变化
-        const scoreChange = document.createElement('div');
-        scoreChange.style.position = 'absolute';
-        scoreChange.style.left = `${Math.random() * (this.toothModel.offsetWidth - 50) + 25}px`;
-        scoreChange.style.top = `${Math.random() * (this.toothModel.offsetHeight - 50) + 25}px`;
-        scoreChange.style.fontSize = '20px';
-        scoreChange.style.fontWeight = 'bold';
-        scoreChange.style.color = amount > 0 ? 'green' : 'red';
-        scoreChange.style.animation = 'scoreChange 1s ease-out forwards';
-        scoreChange.textContent = amount > 0 ? `+${amount}` : `${amount}`;
-        this.toothModel.appendChild(scoreChange);
-        
-        // 添加分数变化动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes scoreChange {
-                0% { transform: scale(0); opacity: 1; }
-                50% { transform: scale(1.2); opacity: 0.8; }
-                100% { transform: scale(1); opacity: 0; }
+        // 添加触摸事件支持
+        item.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            item.click();
+        });
+    });
+}
+
+// 首页交互功能
+function initHomePageInteractions() {
+    // 每日打卡交互
+    const calendarDays = document.querySelectorAll('.calendar-day');
+    calendarDays.forEach(day => {
+        day.addEventListener('click', () => {
+            if (!day.classList.contains('active')) {
+                day.classList.add('active');
+                // 播放打卡音效
+                const buttonSound = document.getElementById('button-sound');
+                if (buttonSound) {
+                    try {
+                        buttonSound.currentTime = 0;
+                        buttonSound.play().catch(e => console.log('Sound play failed:', e));
+                    } catch (e) {
+                        console.log('Sound error:', e);
+                    }
+                }
+                // 显示打卡成功提示
+                showToast('打卡成功！');
             }
-        `;
-        document.head.appendChild(style);
-        
-        // 自动移除分数变化元素
-        setTimeout(() => {
-            scoreChange.remove();
-            style.remove();
-        }, 1000);
+        });
+    });
+    
+    // 我的树苗交互
+    const treeTools = document.querySelectorAll('.tool');
+    treeTools.forEach((tool, index) => {
+        tool.addEventListener('click', () => {
+            // 播放音效
+            const buttonSound = document.getElementById('button-sound');
+            if (buttonSound) {
+                try {
+                    buttonSound.currentTime = 0;
+                    buttonSound.play().catch(e => console.log('Sound play failed:', e));
+                } catch (e) {
+                    console.log('Sound error:', e);
+                }
+            }
+            
+            // 显示不同工具的效果
+            const toolNames = ['浇水', '施肥', '捉虫'];
+            showToast(`${toolNames[index]}成功！`);
+            
+            // 添加工具使用动画
+            tool.style.animation = 'none';
+            setTimeout(() => {
+                tool.style.animation = 'bounce 0.5s ease';
+            }, 10);
+        });
+    });
+    
+    // 热点话题交互
+    const topicCard = document.querySelector('.topic-card');
+    if (topicCard) {
+        topicCard.addEventListener('click', () => {
+            showToast('查看热点话题详情');
+        });
     }
     
-    initToggleControls() {
-        // 初始化排行榜和分数说明的切换控件
-        const leaderboardIcon = document.getElementById('leaderboard-icon');
-        const leaderboard = document.getElementById('leaderboard');
-        const scoreGuideIcon = document.getElementById('score-guide-icon');
-        const scoreGuide = document.getElementById('score-guide');
-        
-        // 点击排行榜图标显示/隐藏排行榜
-        if (leaderboardIcon && leaderboard) {
-            leaderboardIcon.addEventListener('click', () => {
-                leaderboard.style.display = leaderboard.style.display === 'none' ? 'block' : 'none';
-            });
-        }
-        
-        // 点击分数说明图标显示/隐藏分数说明
-        if (scoreGuideIcon && scoreGuide) {
-            scoreGuideIcon.addEventListener('click', () => {
-                scoreGuide.style.display = scoreGuide.style.display === 'none' ? 'block' : 'none';
-            });
-        }
+    // 科普指南交互
+    const guideCard = document.querySelector('.guide-card');
+    if (guideCard) {
+        guideCard.addEventListener('click', () => {
+            showToast('查看健康科普内容');
+        });
     }
+    
+    // 我的收藏交互
+    const collectionItems = document.querySelectorAll('.collection-item');
+    collectionItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            const collectionNames = ['图书', '游戏', '音乐'];
+            showToast(`查看${collectionNames[index]}收藏`);
+        });
+    });
+    
+    // 底部文章交互
+    const bottomArticle = document.querySelector('.bottom-article');
+    if (bottomArticle) {
+        bottomArticle.addEventListener('click', () => {
+            showToast('查看"七步洗手法"详情');
+        });
+    }
+    
+    // AI健康管家交互
+    const aiAssistants = document.querySelectorAll('.ai-assistant');
+    aiAssistants.forEach(assistant => {
+        assistant.addEventListener('click', () => {
+            showToast('AI健康管家正在为您服务');
+        });
+    });
+}
+
+// 我的页面交互功能
+function initMyPageInteractions() {
+    // 积分兑换交互
+    const categoryItems = document.querySelectorAll('.category');
+    categoryItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            const categoryNames = ['健康类', '益智类'];
+            showToast(`查看${categoryNames[index]}兑换商品`);
+        });
+    });
+    
+    // 信息与设置交互
+    const settingItems = document.querySelectorAll('.setting-item');
+    settingItems.forEach((item, index) => {
+        const settingNames = ['家长管控', '记录查询', '设置与反馈', '任务清单'];
+        item.addEventListener('click', () => {
+            showToast(`进入${settingNames[index]}`);
+        });
+    });
+}
+
+// 校园页面交互功能
+function initCampusPageInteractions() {
+    // 标签切换交互
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const tabText = tab.textContent;
+            showToast(`切换到${tabText}`);
+        });
+    });
+    
+    // 体育积分交互
+    const pointsCard = document.querySelector('.points-card');
+    if (pointsCard) {
+        pointsCard.addEventListener('click', () => {
+            showToast('查看体育积分详情');
+        });
+    }
+    
+    // 排行榜交互
+    const rankingCard = document.querySelector('.ranking-card');
+    if (rankingCard) {
+        rankingCard.addEventListener('click', () => {
+            showToast('查看班级排行榜');
+        });
+    }
+    
+    // 更多交互
+    const moreCard = document.querySelector('.more-card');
+    if (moreCard) {
+        moreCard.addEventListener('click', () => {
+            showToast('查看更多功能');
+        });
+    }
+    
+    // 任务清单交互
+    const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+    taskCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('click', () => {
+            checkbox.classList.toggle('checked');
+            if (checkbox.classList.contains('checked')) {
+                showToast('任务完成！');
+            } else {
+                showToast('任务未完成');
+            }
+        });
+    });
+    
+    // 班级动态交互
+    const updateItems = document.querySelectorAll('.update-item');
+    updateItems.forEach(item => {
+        item.addEventListener('click', () => {
+            showToast('查看班级动态详情');
+        });
+    });
+    
+    // 签到按钮交互
+    const updateButtons = document.querySelectorAll('.update-button');
+    updateButtons.forEach(button => {
+        if (!button.classList.contains('confirmed')) {
+            button.addEventListener('click', () => {
+                button.classList.add('confirmed');
+                button.textContent = '已确认';
+                showToast('签到成功！');
+            });
+        }
+    });
+}
+
+// 显示提示信息
+function showToast(message) {
+    // 创建提示元素
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    
+    // 添加样式
+    toast.style.position = 'fixed';
+    toast.style.top = '50%';
+    toast.style.left = '50%';
+    toast.style.transform = 'translate(-50%, -50%)';
+    toast.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '24px';
+    toast.style.fontSize = '14px';
+    toast.style.fontWeight = 'bold';
+    toast.style.zIndex = '9999';
+    toast.style.animation = 'toastShow 0.3s ease forwards';
+    
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes toastShow {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes toastHide {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 添加到页面
+    document.body.appendChild(toast);
+    
+    // 3秒后移除
+    setTimeout(() => {
+        toast.style.animation = 'toastHide 0.3s ease forwards';
+        setTimeout(() => {
+            toast.remove();
+            style.remove();
+        }, 300);
+    }, 2000);
 }
 
 // 初始化游戏
 window.addEventListener('DOMContentLoaded', () => {
+    // 初始化页面导航
+    initPageNavigation();
+    
+    // 初始化首页交互
+    initHomePageInteractions();
+    
+    // 初始化我的页面交互
+    initMyPageInteractions();
+    
+    // 初始化校园页面交互
+    initCampusPageInteractions();
+    
+    // 初始化游戏
     new CavityBugGame();
 });

@@ -9,68 +9,941 @@ body {
     background-color: #f9f9ff;
     color: #333;
     overflow: hidden;
-    background-image: 
-        radial-gradient(circle at 20% 20%, rgba(255, 221, 173, 0.3) 0%, transparent 20%),
-        radial-gradient(circle at 80% 80%, rgba(173, 216, 230, 0.3) 0%, transparent 20%),
-        radial-gradient(circle at 40% 60%, rgba(221, 160, 221, 0.3) 0%, transparent 20%);
-    background-size: 100% 100%;
-    background-attachment: fixed;
+    height: 100vh;
+    position: relative;
 }
 
-/* 更美观的背景动画效果 */
-@keyframes backgroundMove {
-    0% {
-        background-position: 0% 0%;
-    }
-    50% {
-        background-position: 100% 100%;
-    }
-    100% {
-        background-position: 0% 0%;
-    }
-}
-
-#game-container {
+/* 页面容器 */
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
+    display: none;
+    flex-direction: column;
+    background-color: #ffe0b2;
+    z-index: 1;
+}
+
+.page.active {
+    display: flex;
+}
+
+/* 头部 */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background-color: #ff9800;
+    color: white;
+    position: relative;
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #ff5722;
+}
+
+.time {
+    font-size: 14px;
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.ai-assistant {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ff5722;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ai-assistant:hover {
+    transform: scale(1.05);
+    background-color: #e64a19;
+}
+
+.ai-icon {
+    font-size: 16px;
+}
+
+/* 蓝色头部（校园页面） */
+.blue-header {
+    background-color: #2196f3;
+}
+
+.blue-header::after {
+    background-color: #1976d2;
+}
+
+.blue-ai {
+    background-color: #1976d2;
+}
+
+.blue-ai:hover {
+    background-color: #1565c0;
+}
+
+/* 内容区域 */
+.content {
+    flex: 1;
+    padding: 20px;
+    padding-bottom: 80px;
+    overflow-y: auto;
+    background-color: #ffe0b2;
+}
+
+/* 蓝色内容区域（校园页面） */
+.blue-content {
+    background-color: #bbdefb;
+}
+
+/* 每日打卡 */
+.daily-checkin {
+    margin-bottom: 30px;
+}
+
+.daily-checkin h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.avatar-list {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 2px solid #ff5722;
+}
+
+.checkin-streak {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.streak-text {
+    font-size: 14px;
+    color: #e64a19;
+}
+
+.streak-days {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ff5722;
+}
+
+.streak-unit {
+    font-size: 14px;
+    color: #e64a19;
+}
+
+.checkin-calendar {
+    display: flex;
+    gap: 12px;
+    background-color: #ff5722;
+    padding: 16px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.calendar-day {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #ffab91;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #e64a19;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.calendar-day.active {
+    background-color: white;
+    color: #ff5722;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.calendar-day:hover {
+    transform: scale(1.1);
+}
+
+/* 我的树苗 */
+.my-tree {
+    margin-bottom: 30px;
+}
+
+.my-tree h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.tree-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: #fff3e0;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.tree {
+    font-size: 64px;
+}
+
+.tree-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tool {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tool:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* 热点话题 */
+.hot-topics {
+    margin-bottom: 30px;
+}
+
+.hot-topics h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.topic-card {
+    background-color: #fff3e0;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.topic-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.topic-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e64a19;
+    margin-bottom: 12px;
+}
+
+.topic-elements {
+    display: flex;
+    gap: 16px;
+}
+
+.topic-element {
+    font-size: 32px;
+}
+
+/* 科普指南 */
+.science-guide {
+    margin-bottom: 30px;
+}
+
+.science-guide h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.guide-card {
+    background-color: #fff3e0;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.guide-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.guide-icon {
+    font-size: 48px;
+}
+
+.guide-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e64a19;
+}
+
+/* 我的收藏 */
+.my-collection {
+    margin-bottom: 30px;
+}
+
+.my-collection h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.collection-items {
+    display: flex;
+    gap: 16px;
+}
+
+.collection-item {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background-color: #fff3e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.collection-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* 底部文章 */
+.bottom-article {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background-color: #ff5722;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.bottom-article:hover {
+    transform: scale(1.02);
+    background-color: #e64a19;
+}
+
+.article-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.house-icon {
+    font-size: 24px;
+    color: #ff5722;
+}
+
+.article-content {
+    flex: 1;
+}
+
+.article-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.article-source {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* 我的页面 */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: #fff3e0;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff5722;
+    margin-bottom: 8px;
+}
+
+.user-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.stat {
+    font-size: 14px;
+    color: #e64a19;
+}
+
+.recent-activity h3 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e64a19;
+    margin-bottom: 8px;
+}
+
+.activity-item {
+    font-size: 12px;
+    color: #e64a19;
+    margin-bottom: 4px;
+}
+
+.rating {
+    display: inline-block;
+    background-color: #ff5722;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.user-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 4px solid #ff5722;
+}
+
+.avatar-image {
+    font-size: 64px;
+}
+
+/* 积分兑换 */
+.points-exchange {
+    margin-bottom: 30px;
+}
+
+.points-exchange h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.current-points {
+    background-color: #ff5722;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.exchange-categories {
+    display: flex;
+    gap: 16px;
+}
+
+.category {
+    flex: 1;
+    background-color: #fff3e0;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.category h3 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e64a19;
+    margin-bottom: 12px;
+}
+
+.category-item {
+    font-size: 48px;
+}
+
+/* 信息与设置 */
+.info-settings {
+    margin-bottom: 30px;
+}
+
+.info-settings h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #e64a19;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.setting-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
+    background-color: #fff3e0;
     padding: 20px;
-    background-image: 
-        linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.5) 100%),
-        radial-gradient(circle at 10% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 20%);
-    background-size: 100% 100%, 100% 100%, 100% 100%;
-    background-attachment: fixed;
-    background-position: 0% 0%;
-    animation: backgroundMove 30s ease infinite;
-    border-radius: 20px;
-    margin: 0;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    overflow: hidden;
-    box-sizing: border-box;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-/* 响应式调整游戏容器 */
-@media (max-width: 768px) {
-    #game-container {
-        margin: 10px;
-        padding: 15px;
-    }
+.setting-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-@media (max-width: 480px) {
-    #game-container {
-        margin: 5px;
-        padding: 10px;
-        border-radius: 15px;
-    }
+.setting-icon {
+    font-size: 32px;
 }
 
-h1 {
-    font-size: 3rem;
+.setting-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e64a19;
+}
+
+/* 校园页面 */
+.campus-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    flex: 1;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab.active {
+    background-color: #ffffff;
+    color: #1976d2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tab:hover {
+    transform: scale(1.02);
+}
+
+/* 学校信息 */
+.school-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background-color: #e3f2fd;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.school-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-size: 32px;
+}
+
+.school-details {
+    flex: 1;
+}
+
+.school-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 4px;
+}
+
+.school-class {
+    font-size: 14px;
+    color: #64b5f6;
+}
+
+/* 体育积分 */
+.sports-points {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.points-card,
+.ranking-card,
+.more-card {
+    flex: 1;
+    background-color: #1976d2;
+    color: white;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.points-card:hover,
+.ranking-card:hover,
+.more-card:hover {
+    transform: scale(1.05);
+    background-color: #1565c0;
+}
+
+.points-label,
+.ranking-label,
+.more-label {
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.points-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.points-icon,
+.ranking-icon,
+.more-icon {
+    font-size: 24px;
+}
+
+/* 任务清单 */
+.task-list {
+    margin-bottom: 30px;
+}
+
+.task-list h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #1976d2;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #e3f2fd;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover {
+    transform: scale(1.02);
+    background-color: #bbdefb;
+}
+
+.task-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1976d2;
+}
+
+.task-target {
+    font-size: 14px;
+    color: #64b5f6;
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #90caf9;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.task-checkbox.checked {
+    background-color: #4caf50;
+    border-color: #4caf50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+}
+
+.task-checkbox.checked::after {
+    content: '✓';
+}
+
+.task-clipboard {
+    width: 80px;
+    height: 80px;
+    background-color: #e3f2fd;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.task-clipboard:hover {
+    transform: scale(1.1);
+    background-color: #bbdefb;
+}
+
+.clipboard-icon {
+    font-size: 32px;
+    color: #1976d2;
+}
+
+/* 班级动态 */
+.class-updates {
+    margin-bottom: 30px;
+}
+
+.class-updates h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #1976d2;
+}
+
+.update-list {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+}
+
+.update-item {
+    flex: 0 0 160px;
+    background-color: #e3f2fd;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.update-item:hover {
+    transform: scale(1.05);
+    background-color: #bbdefb;
+}
+
+.update-date {
+    font-size: 12px;
+    color: #64b5f6;
+    margin-bottom: 8px;
+}
+
+.update-content {
+    font-size: 12px;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.update-button {
+    width: 100%;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.update-button:hover {
+    background-color: #1565c0;
+}
+
+.update-button.confirmed {
+    background-color: #4caf50;
+}
+
+.update-button.confirmed:hover {
+    background-color: #388e3c;
+}
+
+/* 底部导航栏 */
+.bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: #ff9800;
+    padding: 12px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+
+.bottom-nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #ff5722;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 12px;
+}
+
+.nav-item:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-icon {
+    font-size: 20px;
+}
+
+.nav-text {
+    font-size: 10px;
+}
+
+/* 游戏页面 */
+#game-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#game-container h1 {
+    font-size: 2rem;
     color: #ff6b6b;
     text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
     margin-bottom: 30px;
@@ -85,16 +958,13 @@ h1 {
 
 #game-info {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
     width: 100%;
-    max-width: 500px;
-    margin-bottom: 20px;
-    font-size: 1.2rem;
+    margin-bottom: 30px;
+    font-size: 1.4rem;
     font-weight: bold;
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 15px 20px;
+    padding: 15px 25px;
     border-radius: 30px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border: 2px solid #f0f0f0;
@@ -106,37 +976,16 @@ h1 {
     background-color: #f8f9fa;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
-    flex: 1 1 120px;
-    text-align: center;
-}
-
-#game-info div:hover {
-    transform: scale(1.05);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.15);
-}
-
-/* 响应式调整游戏信息区域 */
-@media (max-width: 480px) {
-    #game-info {
-        font-size: 1rem;
-        padding: 10px 15px;
-        gap: 8px;
-    }
-    
-    #game-info div {
-        flex: 1 1 80px;
-        padding: 6px 12px;
-    }
 }
 
 #tooth-model {
-    width: 400px;
-    height: 280px;
+    width: 300px;
+    height: 200px;
     background-color: #ffffff;
     border: 6px solid #f0f0f0;
     border-radius: 70px;
     position: relative;
-    margin-bottom: 60px;
+    margin: 0 auto 40px;
     box-shadow: 
         0 8px 16px rgba(0,0,0,0.1),
         inset 0 2px 4px rgba(0,0,0,0.05);
@@ -147,31 +996,7 @@ h1 {
     transition: all 0.3s ease;
 }
 
-#tooth-model:hover {
-    transform: scale(1.02);
-    box-shadow: 
-        0 12px 24px rgba(0,0,0,0.15),
-        inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* 牙龈元素 */
 #tooth-model::before {
-    content: '';
-    position: absolute;
-    bottom: -30px;
-    left: 0;
-    right: 0;
-    height: 30px;
-    background-color: #ff9ff3;
-    border-radius: 0 0 50% 50%;
-    box-shadow: inset 0 -2px 4px rgba(255, 107, 107, 0.3);
-    background-image: linear-gradient(to top, #ff6b6b, #ff9ff3);
-    z-index: 1;
-    pointer-events: none;
-}
-
-/* 牙齿纹理 */
-#tooth-model::after {
     content: '';
     position: absolute;
     top: 0;
@@ -184,11 +1009,9 @@ h1 {
         radial-gradient(circle at 40% 40%, rgba(255,255,255,0.7) 0%, transparent 15%),
         radial-gradient(circle at 60% 60%, rgba(255,255,255,0.7) 0%, transparent 15%);
     pointer-events: none;
-    z-index: 2;
 }
 
-/* 牙齿光泽效果 */
-#tooth-model .shine-effect {
+#tooth-model::after {
     content: '';
     position: absolute;
     top: 10%;
@@ -199,7 +1022,6 @@ h1 {
     border-radius: 50%;
     pointer-events: none;
     animation: shine 3s infinite alternate;
-    z-index: 3;
 }
 
 @keyframes shine {
@@ -207,6 +1029,86 @@ h1 {
     100% { opacity: 0.8; }
 }
 
+#game-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+#game-controls button {
+    padding: 14px 22px;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 6px 12px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+#toothpaste-gun {
+    background-color: #4ecdc4;
+    color: white;
+    background-image: linear-gradient(135deg, #4ecdc4 0%, #45b7d1 100%);
+    border: 3px solid #3aafa9;
+}
+
+#toothbrush-sword {
+    background-color: #ff6b6b;
+    color: white;
+    background-image: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    border: 3px solid #e74c3c;
+}
+
+#super-cleaner {
+    background-color: #9b59b6;
+    color: white;
+    background-image: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    border: 3px solid #7d3c98;
+}
+
+#game-message {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin-bottom: 30px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 16px 24px;
+    border-radius: 35px;
+    box-shadow: 
+        0 6px 12px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(0,0,0,0.05);
+    border: 3px solid #f0f0f0;
+    min-width: 200px;
+    max-width: 300px;
+    margin: 0 auto 30px;
+    transition: all 0.3s ease;
+}
+
+#start-button {
+    background-color: #45b7d1;
+    color: white;
+    font-size: 1.2rem;
+    padding: 16px 40px;
+    background-image: linear-gradient(135deg, #45b7d1 0%, #2c8cb0 100%);
+    border: 3px solid #3498db;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+#start-button:hover {
+    background-image: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    transform: translateY(-4px) scale(1.05);
+}
+
+/* 食物残渣和蛀牙虫 */
 .food-residue {
     position: absolute;
     width: 25px;
@@ -215,20 +1117,14 @@ h1 {
     cursor: pointer;
     animation: bounce 1s infinite alternate;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%);
 }
 
-/* 不同形状的食物残渣 */
 .food-residue:nth-child(odd) {
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
 }
 
 .food-residue:nth-child(3n) {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-}
-
-.food-residue:nth-child(4n) {
-    border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
 }
 
 @keyframes bounce {
@@ -245,10 +1141,8 @@ h1 {
     animation: wiggle 1.5s infinite alternate;
     cursor: pointer;
     box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%);
 }
 
-/* 蛀牙虫的眼睛 */
 .cavity-bug::before,
 .cavity-bug::after {
     content: '';
@@ -258,7 +1152,6 @@ h1 {
     background-color: white;
     border-radius: 50%;
     top: 8px;
-    box-shadow: inset 0 2px 2px rgba(0,0,0,0.3);
 }
 
 .cavity-bug::before {
@@ -269,7 +1162,6 @@ h1 {
     right: 6px;
 }
 
-/* 蛀牙虫的嘴巴 */
 .cavity-bug span {
     position: absolute;
     width: 12px;
@@ -281,422 +1173,9 @@ h1 {
     transform: translateX(-50%);
 }
 
-/* 蛀牙虫的眼睛瞳孔 */
-.cavity-bug::before {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background-color: white;
-    border-radius: 50%;
-    top: 8px;
-    left: 6px;
-    box-shadow: inset 0 2px 2px rgba(0,0,0,0.3);
-}
-
-.cavity-bug::after {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background-color: white;
-    border-radius: 50%;
-    top: 8px;
-    right: 6px;
-    box-shadow: inset 0 2px 2px rgba(0,0,0,0.3);
-}
-
-/* 快速蛀牙虫样式 */
-.cavity-bug[style*="background-color: #ff6b6b"] {
-    background-color: #ff6b6b;
-    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%);
-    animation: wiggle 1s infinite alternate;
-}
-
-/* 坚韧蛀牙虫样式 */
-.cavity-bug[style*="background-color: #8b4513"] {
-    background-color: #8b4513;
-    background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%);
-    animation: wiggle 2s infinite alternate;
-}
-
 @keyframes wiggle {
-    0% { transform: rotate(-5deg) scale(1); }
-    50% { transform: rotate(0deg) scale(1.05); }
-    100% { transform: rotate(5deg) scale(1); }
-}
-
-#game-controls {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-button {
-    padding: 20px 35px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 35px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 
-        0 6px 12px rgba(0,0,0,0.1),
-        inset 0 2px 4px rgba(255,255,255,0.3);
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    position: relative;
-    overflow: hidden;
-}
-
-button:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 
-        0 10px 20px rgba(0,0,0,0.15),
-        inset 0 2px 4px rgba(255,255,255,0.3);
-}
-
-button:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 
-        0 4px 8px rgba(0,0,0,0.1),
-        inset 0 2px 4px rgba(255,255,255,0.3);
-}
-
-#toothpaste-gun {
-    background-color: #4ecdc4;
-    color: white;
-    background-image: linear-gradient(135deg, #4ecdc4 0%, #45b7d1 100%);
-    border: 3px solid #3aafa9;
-}
-
-#toothpaste-gun:hover {
-    background-image: linear-gradient(135deg, #3aafa9 0%, #2b9eb3 100%);
-}
-
-#toothbrush-sword {
-    background-color: #ff6b6b;
-    color: white;
-    background-image: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    border: 3px solid #e74c3c;
-}
-
-#toothbrush-sword:hover {
-    background-image: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-#start-button {
-    background-color: #45b7d1;
-    color: white;
-    font-size: 1.4rem;
-    padding: 20px 50px;
-    background-image: linear-gradient(135deg, #45b7d1 0%, #2c8cb0 100%);
-    border: 3px solid #3498db;
-    margin-top: 20px;
-}
-
-#start-button:hover {
-    background-image: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    transform: translateY(-4px) scale(1.08);
-}
-
-/* 按钮发光效果 */
-button::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-    transform: scale(0);
-    transition: transform 0.6s ease;
-}
-
-button:hover::after {
-    transform: scale(1);
-}
-
-/* 按钮图标效果 */
-#toothpaste-gun::before {
-    content: '🧴';
-    margin-right: 10px;
-    font-size: 1.4rem;
-}
-
-#toothbrush-sword::before {
-    content: '🗡️';
-    margin-right: 10px;
-    font-size: 1.4rem;
-}
-
-#start-button::before {
-    content: '🎮';
-    margin-right: 10px;
-    font-size: 1.6rem;
-}
-
-#super-cleaner {
-    background-color: #9b59b6;
-    color: white;
-    background-image: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-    border: 3px solid #7d3c98;
-}
-
-#super-cleaner:hover {
-    background-image: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
-}
-
-#super-cleaner::before {
-    content: '🧹';
-    margin-right: 10px;
-    font-size: 1.4rem;
-}
-
-#pause-button {
-    background-color: #ffd93d;
-    color: #333;
-    background-image: linear-gradient(135deg, #ffd93d 0%, #ffcc00 100%);
-    border: 3px solid #ffcc00;
-}
-
-#pause-button:hover {
-    background-image: linear-gradient(135deg, #ffcc00 0%, #e6b800 100%);
-}
-
-#pause-button::before {
-    content: '⏸️';
-    margin-right: 10px;
-    font-size: 1.4rem;
-}
-
-#game-message {
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #ff6b6b;
-    margin-bottom: 30px;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px 40px;
-    border-radius: 35px;
-    box-shadow: 
-        0 6px 12px rgba(0,0,0,0.1),
-        inset 0 2px 4px rgba(0,0,0,0.05);
-    border: 3px solid #f0f0f0;
-    min-width: 300px;
-    max-width: 500px;
-    transition: all 0.3s ease;
-    animation: messagePulse 3s infinite alternate;
-}
-
-#game-message:hover {
-    transform: scale(1.02);
-    box-shadow: 
-        0 8px 16px rgba(0,0,0,0.15),
-        inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-@keyframes messagePulse {
-    0% { 
-        transform: scale(1); 
-        box-shadow: 
-            0 6px 12px rgba(0,0,0,0.1),
-            inset 0 2px 4px rgba(0,0,0,0.05);
-    }
-    100% { 
-        transform: scale(1.03); 
-        box-shadow: 
-            0 8px 16px rgba(0,0,0,0.15),
-            inset 0 2px 4px rgba(0,0,0,0.05);
-    }
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    h1 {
-        font-size: 2.2rem;
-    }
-    
-    #tooth-model {
-        width: 300px;
-        height: 200px;
-    }
-    
-    button {
-        padding: 14px 22px;
-        font-size: 0.95rem;
-    }
-    
-    #game-controls {
-        gap: 20px;
-    }
-    
-    #game-message {
-        font-size: 1.2rem;
-        padding: 15px 30px;
-        max-width: 400px;
-    }
-}
-
-@media (max-width: 480px) {
-    h1 {
-        font-size: 1.6rem;
-        margin-bottom: 15px;
-    }
-    
-    #game-info {
-        font-size: 0.9rem;
-        max-width: 300px;
-        padding: 10px 15px;
-    }
-    
-    #tooth-model {
-        width: 280px;
-        height: 180px;
-        margin-bottom: 20px;
-    }
-    
-    .food-residue {
-        width: 22px;
-        height: 22px;
-    }
-    
-    .cavity-bug {
-        width: 30px;
-        height: 30px;
-    }
-    
-    #game-controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-    }
-    
-    button {
-        padding: 12px 25px;
-        font-size: 0.9rem;
-        width: 200px;
-        max-width: 100%;
-    }
-    
-    #game-message {
-        font-size: 1rem;
-        text-align: center;
-        padding: 10px 20px;
-        max-width: 300px;
-        min-width: 200px;
-    }
-    
-    /* 排行榜和分数说明按钮 */
-    #leaderboard-icon,
-    #score-guide-icon {
-        padding: 6px;
-    }
-    
-    #leaderboard-icon span,
-    #score-guide-icon span {
-        font-size: 16px;
-    }
-    
-    #leaderboard {
-        width: 130px;
-        top: 50px;
-        right: 5px;
-    }
-    
-    #score-guide {
-        width: 160px;
-        bottom: 50px;
-        left: 5px;
-    }
-}
-
-@media (max-width: 360px) {
-    h1 {
-        font-size: 1.4rem;
-        margin-bottom: 10px;
-    }
-    
-    #game-container {
-        padding: 10px;
-        border-radius: 15px;
-    }
-    
-    #game-info {
-        font-size: 0.8rem;
-        max-width: 250px;
-        padding: 8px 12px;
-        gap: 6px;
-    }
-    
-    #game-info div {
-        flex: 1 1 70px;
-        padding: 5px 10px;
-    }
-    
-    #tooth-model {
-        width: 250px;
-        height: 160px;
-        margin-bottom: 15px;
-        border-radius: 50px;
-    }
-    
-    .food-residue {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .cavity-bug {
-        width: 28px;
-        height: 28px;
-    }
-    
-    button {
-        padding: 10px 20px;
-        font-size: 0.85rem;
-        width: 180px;
-    }
-    
-    #game-message {
-        font-size: 0.9rem;
-        padding: 8px 16px;
-        max-width: 250px;
-    }
-    
-    /* 排行榜和分数说明按钮 */
-    #leaderboard-icon,
-    #score-guide-icon {
-        padding: 5px;
-    }
-    
-    #leaderboard-icon span,
-    #score-guide-icon span {
-        font-size: 14px;
-    }
-    
-    #leaderboard {
-        width: 120px;
-        top: 45px;
-        right: 5px;
-    }
-    
-    #leaderboard h3,
-    #score-guide h3 {
-        font-size: 12px;
-    }
-    
-    #leaderboard-list,
-    #score-guide ul {
-        font-size: 10px;
-    }
-    
-    #score-guide {
-        width: 140px;
-        bottom: 45px;
-        left: 5px;
-    }
+    0% { transform: rotate(-5deg); }
+    100% { transform: rotate(5deg); }
 }
 
 /* 特效 */
@@ -726,4 +1205,132 @@ button:hover::after {
 @keyframes float {
     0% { transform: translateY(0); opacity: 1; }
     100% { transform: translateY(-50px); opacity: 0; }
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+    .header {
+        padding: 12px 16px;
+    }
+    
+    .header-title {
+        font-size: 18px;
+    }
+    
+    .ai-assistant {
+        padding: 6px 12px;
+        font-size: 10px;
+    }
+    
+    .content {
+        padding: 16px;
+    }
+    
+    .avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+    
+    .streak-days {
+        font-size: 28px;
+    }
+    
+    .checkin-calendar {
+        gap: 8px;
+        padding: 12px;
+    }
+    
+    .calendar-day {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .tree {
+        font-size: 48px;
+    }
+    
+    .tool {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    
+    .topic-element {
+        font-size: 24px;
+    }
+    
+    .collection-item {
+        width: 56px;
+        height: 56px;
+        font-size: 28px;
+    }
+    
+    .user-avatar {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .avatar-image {
+        font-size: 56px;
+    }
+    
+    .settings-grid {
+        gap: 12px;
+    }
+    
+    .setting-item {
+        padding: 16px;
+    }
+    
+    .setting-icon {
+        font-size: 28px;
+    }
+    
+    .nav-icon {
+        font-size: 18px;
+    }
+    
+    .nav-text {
+        font-size: 10px;
+    }
+    
+    #tooth-model {
+        width: 280px;
+        height: 180px;
+    }
+    
+    #game-controls {
+        gap: 8px;
+    }
+    
+    #game-controls button {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .content {
+        padding: 12px;
+    }
+    
+    .tree {
+        font-size: 40px;
+    }
+    
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .avatar-image {
+        font-size: 48px;
+    }
+    
+    #tooth-model {
+        width: 250px;
+        height: 160px;
+    }
 }
